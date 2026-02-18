@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="km">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>សិរីមង្គលអាពាហ៍ពិពាហ៍</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Moul&family=Kantumruy+Pro:wght@300;400;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        ::root {
+            --gold: #d4af37;
+        }
+
+        body {
+            font-family: 'Kantumruy Pro', sans-serif;
+            margin: 0;
+            background: #000;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .font-moul {
+            font-family: 'Moul', serif;
+        }
+
+        .hero-bg {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8)),
+                url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=2000');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        .glass-box {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .gold-text {
+            color: var(--gold);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+        }
+
+        #initial-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.8s ease;
+        }
+
+        .guest-box {
+            border: 2px solid rgba(212, 175, 55, 0.5);
+            padding: 12px 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 9999px;
+            display: inline-block;
+        }
+
+        .fade-in {
+            animation: fadeIn 1.2s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .music-playing {
+            animation: rotate 4s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        #music-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1001;
+            background: rgba(212, 175, 55, 0.8);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Background Music (Replace source with actual wedding song URL) -->
+    <audio id="bgMusic" loop>
+        <source src="music/Nevermind - គគរង - Chen  Pre wedding Video [ Gooda & Sokneth ].mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Floating Music Control -->
+    <div id="music-control" onclick="toggleMusic()">
+        <i data-lucide="music" class="text-white w-5 h-5"></i>
+    </div>
+
+    <!-- OVERLAY SELECTION -->
+    <div id="initial-overlay" class="hero-bg px-4">
+        <div class="max-w-md w-full glass-box p-8 sm:p-10 rounded-[2.5rem] text-center shadow-2xl">
+            <div class="mb-6 flex justify-center">
+                <div class="p-4 bg-white/10 rounded-full">
+                    <i data-lucide="heart" class="text-pink-500 fill-pink-500 animate-pulse"></i>
+                </div>
+            </div>
+
+            <h2 class="font-moul text-xl sm:text-2xl gold-text mb-4">សូមស្វាគមន៍មកកាន់សិរីសួស្តី</h2>
+            <p class="mb-8 text-gray-200 text-sm sm:text-base">សូមបញ្ជាក់ស្ថានភាពអ្នកពេលនេះ😒</p>
+
+            <div id="type-selector" class="space-y-4">
+                <button onclick="selectType('single')" class="w-full py-4 bg-white/10 rounded-2xl border border-white/20 hover:bg-white/20 transition-all duration-300">
+                    Single (គ្មានអ្នកយក😏)
+                </button>
+
+                <button onclick="selectType('couple')" class="w-full py-4 bg-amber-600/20 text-amber-400 rounded-2xl border border-amber-500/30 hover:bg-amber-600/30 transition-all duration-300">
+                    មកជាមួយដៃគូរ😎
+                </button>
+            </div>
+
+            <!-- Input Fields for Couple -->
+            <div id="input-fields" class="mt-8 hidden space-y-4 fade-in">
+                <input type="text" id="name1" placeholder="ឈ្មោះរបស់អ្នក" class="w-full px-5 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-amber-400 transition-colors">
+                <input type="text" id="name2" placeholder="ឈ្មោះដៃគូ" class="w-full px-5 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-amber-400 transition-colors">
+                <button onclick="generateCard()" class="w-full py-4 bg-amber-600 rounded-xl font-bold hover:bg-amber-700 transition shadow-lg active:scale-95">រួចរាល់</button>
+                <button onclick="resetSelection()" class="text-sm text-gray-400 underline block w-full">ត្រឡប់ក្រោយ</button>
+            </div>
+
+            <!-- Input for Single -->
+            <div id="single-confirm" class="mt-8 hidden space-y-4 fade-in">
+                <input type="text" id="single-name" placeholder="បញ្ចូលឈ្មោះរបស់អ្នក" class="w-full px-5 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-amber-400 transition-colors">
+                <button onclick="generateCard()" class="w-full py-4 bg-amber-600 rounded-xl font-bold hover:bg-amber-700 shadow-lg active:scale-95">រួចរាល់</button>
+                <button onclick="resetSelection()" class="text-sm text-gray-400 underline block w-full">ត្រឡប់ក្រោយ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main id="main-content" class="hidden">
+        <!-- Hero Section -->
+        <section class="hero-bg min-h-screen flex flex-col items-center justify-center text-center px-4 py-20 relative">
+            <div class="fade-in w-full max-w-4xl">
+                <h1 class="font-moul text-2xl sm:text-4xl md:text-5xl mb-12 tracking-wider">សិរីមង្គលអាពាហ៍ពិពាហ៍</h1>
+
+                <div class="glass-box rounded-[3rem] py-12 px-6 sm:px-12 mb-12 border-2 border-white/5">
+                    <h2 class="font-moul text-4xl sm:text-6xl md:text-7xl gold-text mb-6">ចាន់រ៉ា</h2>
+                    <div class="my-8">
+                        <i data-lucide="heart" class="fill-red-500 text-red-500 w-16 h-16 inline-block animate-pulse"></i>
+                    </div>
+                    <h2 class="font-moul text-4xl sm:text-6xl md:text-7xl gold-text mt-6">ឈ្មោះ...🥬</h2>
+                </div>
+
+                <p class="text-lg md:text-xl mb-6 italic text-gray-300">សូមគោរពអញ្ជើញ</p>
+                <div class="guest-box mb-12">
+                    <span id="final-guest-name" class="text-2xl sm:text-4xl font-bold tracking-widest text-white">ភ្ញៀវកិត្តិយស</span>
+                </div>
+
+                <div class="space-y-4 bg-black/40 p-8 rounded-3xl border border-white/10 backdrop-blur-md">
+                    <p class="font-moul text-xl sm:text-2xl gold-text">ថ្ងៃអាទិត្យ ទី ០៤ ខែ កុម្ភៈ ឆ្នាំ ២០៣០</p>
+                    <p class="text-gray-200 text-sm sm:text-lg">ភូមិរោងធិ៍រោង ឃុំជីផុច ស្រុកមេសាង ខេត្តព្រៃវែង</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- DETAILS & MAP -->
+        <section class="py-24 px-6 bg-white text-black">
+            <div class="max-w-4xl mx-auto text-center">
+                <div class="text-center px-4">
+        <h3 class="font-moul text-lg sm:text-3xl text-amber-600 mb-16 underline underline-offset-8 decoration-amber-200/50 leading-loose">
+            ពេលវេលាកម្មពិធី និង កន្លែងប្រារព្ធ
+        </h3>
+    </div>
+                <div class="grid md:grid-cols-2 gap-8 mb-16">
+                    <div class="p-10 border border-amber-100 rounded-[3rem] bg-amber-50/30">
+                        <i data-lucide="sun" class="mx-auto mb-6 text-amber-700 w-12 h-12"></i>
+                        <h4 class="font-moul text-xl mb-4 text-amber-800">ពិធីហែកូនកំលោះ</h4>
+                        <p class="text-gray-600 text-lg">ម៉ោង <span class="font-bold">៧:០០ ព្រឹក</span></p>
+                    </div>
+                    <div class="p-10 border border-amber-100 rounded-[3rem] bg-amber-50/30">
+                        <i data-lucide="utensils" class="mx-auto mb-6 text-amber-700 w-12 h-12"></i>
+                        <h4 class="font-moul text-xl mb-4 text-amber-800">ពិសាភោជនាហារ</h4>
+                        <p class="text-gray-600 text-lg">ម៉ោង <span class="font-bold">៤:០០ រសៀល</span></p>
+                    </div>
+                </div>
+                <div class="rounded-[2.5rem] overflow-hidden shadow-2xl h-80 md:h-[500px] mb-10 border-8 border-white">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3910.4567!2d105.5!3d11.3!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTHCsDE4JzAwLjAiTiAxMDXCsDMwJzAwLjAiRQ!5e0!3m2!1skm!2skh!4v1600000000000!5m2!1skm!2skh" class="w-full h-full border-0" loading="lazy"></iframe>
+                </div>
+            </div>
+        </section>
+
+         <!-- Thank You Message -->
+        <footer class="hero-bg py-32 px-6 text-center border-t border-white/10">
+            <div class="max-w-2xl mx-auto">
+                <div class="mb-10">
+                    <i data-lucide="heart" class="text-red-500 fill-red-500 scale-[2] inline-block animate-pulse"></i>
+                </div>
+                <h3 class="font-moul text-4xl gold-text mb-8">សូមអរគុណ</h3>
+                <p class="text-gray-200 text-xl leading-loose italic">
+                    " វត្តមានរបស់លោកអ្នក គឺជាកិត្តិយសដ៏ខ្ពង់ខ្ពស់សម្រាប់ក្រុមគ្រួសារយើងខ្ញុំ។ <br>
+                    សូមជូនពរឱ្យលោកអ្នកទទួលបាននូវសុភមង្គល និង សេចក្តីសុខគ្រប់ប្រការ។ "
+                </p>
+                <div class="mt-20 opacity-30 text-xs tracking-[0.5em]">FEBRUARY 2030</div>
+            </div>
+        </footer>
+
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        let selectionType = '';
+        const audio = document.getElementById('bgMusic');
+        const musicBtn = document.getElementById('music-control');
+        audio.volume = 0.5;
+
+        function startMusic() {
+            audio.play().then(() => {
+                musicBtn.style.display = 'flex';
+                musicBtn.classList.add('music-playing');
+            }).catch(e => console.log("Waiting for user interaction..."));
+        }
+
+        function selectType(type) {
+            selectionType = type;
+            startMusic();
+            document.getElementById('type-selector').classList.add('hidden');
+            if (type === 'couple') {
+                document.getElementById('input-fields').classList.remove('hidden');
+            } else {
+                document.getElementById('single-confirm').classList.remove('hidden');
+            }
+        }
+
+        function resetSelection() {
+            document.getElementById('type-selector').classList.remove('hidden');
+            document.getElementById('input-fields').classList.add('hidden');
+            document.getElementById('single-confirm').classList.add('hidden');
+        }
+
+        function generateCard() {
+            let finalName = "";
+            if (selectionType === 'couple') {
+                const n1 = document.getElementById('name1').value.trim();
+                const n2 = document.getElementById('name2').value.trim();
+                if (!n1 || !n2) return alert("សូមបំពេញឈ្មោះទាំងពីរ!");
+                finalName = n1 + " & " + n2;
+            } else {
+                const n = document.getElementById('single-name').value.trim();
+                if (!n) return alert("សូមបញ្ចូលឈ្មោះរបស់អ្នក!");
+                finalName = n;
+            }
+
+            document.getElementById('final-guest-name').innerText = finalName;
+            document.getElementById('initial-overlay').classList.add('opacity-0', 'pointer-events-none');
+
+            setTimeout(() => {
+                document.getElementById('initial-overlay').style.display = 'none';
+                document.getElementById('main-content').classList.remove('hidden');
+                window.scrollTo(0, 0);
+            }, 800);
+        }
+
+        function toggleMusic() {
+            if (audio.paused) {
+                audio.play();
+                musicBtn.classList.add('music-playing');
+            } else {
+                audio.pause();
+                musicBtn.classList.remove('music-playing');
+            }
+        }
+    </script>
+</body>
+</html>
