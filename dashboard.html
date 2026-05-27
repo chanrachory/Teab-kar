@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="km">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard គ្រប់គ្រងព័ត៌មាន</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Moul&family=Kantumruy+Pro:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+      body {
+        font-family: "Kantumruy Pro", sans-serif;
+        background: #f3f4f6;
+      }
+      .font-moul {
+        font-family: "Moul", serif;
+      }
+    </style>
+  </head>
+
+  <body class="text-gray-800 p-4 sm:p-8">
+    <!-- Login Section -->
+    <div
+      id="login-section"
+      class="max-w-md mx-auto bg-white p-6 sm:p-10 rounded-2xl shadow-xl mt-10"
+    >
+      <h1 class="font-moul text-2xl text-amber-600 mb-6 text-center">
+        ចូលគណនី
+      </h1>
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2"
+            >អ៊ីមែល (Email)</label
+          >
+          <input
+            type="email"
+            id="email"
+            required
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2"
+            >ពាក្យសម្ងាត់ (Password)</label
+          >
+          <input
+            type="password"
+            id="password"
+            required
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
+          />
+        </div>
+        <div id="login-error" class="text-red-500 text-sm hidden">
+          អ៊ីមែល ឬលេខសម្ងាត់មិនត្រឹមត្រូវ!
+        </div>
+        <button
+          type="submit"
+          class="w-full py-3 bg-amber-600 text-white font-bold rounded-lg hover:bg-amber-700 transition"
+        >
+          ចូល (Login)
+        </button>
+      </form>
+    </div>
+
+    <!-- Main Dashboard Section (Hidden by default) -->
+    <div
+      id="dashboard-section"
+      class="max-w-3xl mx-auto bg-white p-6 sm:p-10 rounded-2xl shadow-xl hidden"
+    >
+      <div class="flex items-center justify-between mb-8">
+        <h1 class="font-moul text-2xl text-amber-600">
+          គ្រប់គ្រងព័ត៌មានធៀបការ
+        </h1>
+        <div class="flex items-center gap-4">
+          <a
+            href="index.html"
+            class="text-blue-500 hover:underline text-sm flex items-center gap-1"
+          >
+            <i data-lucide="external-link" class="w-4 h-4"></i> មើលធៀបការ
+          </a>
+          <button
+            id="logout-btn"
+            class="text-red-500 hover:underline text-sm flex items-center gap-1"
+          >
+            <i data-lucide="log-out" class="w-4 h-4"></i> ចាកចេញ
+          </button>
+        </div>
+      </div>
+
+      <div id="loading" class="text-center py-4 text-amber-500 hidden">
+        កំពុងដំណើរការ...
+      </div>
+      <div
+        id="success-msg"
+        class="text-center py-3 mb-4 bg-green-100 text-green-700 rounded-lg hidden"
+      >
+        រក្សាទុកបានជោគជ័យ!
+      </div>
+      <div
+        id="error-msg"
+        class="text-center py-3 mb-4 bg-red-100 text-red-700 rounded-lg hidden"
+      >
+        មានបញ្ហា! សូមពិនិត្យ Firebase Config ឬ Rules។
+      </div>
+
+      <form id="dashboard-form" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2"
+              >ឈ្មោះកូនកំលោះ</label
+            >
+            <input
+              type="text"
+              id="groomName"
+              required
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2"
+              >ឈ្មោះកូនក្រមុំ</label
+            >
+            <input
+              type="text"
+              id="brideName"
+              required
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2"
+            >កាលបរិច្ឆេទ</label
+          >
+          <input
+            type="text"
+            id="eventDate"
+            placeholder="ឧ. ថ្ងៃអាទិត្យ ទី ០៤ ខែ កុម្ភៈ ឆ្នាំ ២០៣០"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2"
+            >ទីតាំងប្រារព្ធពិធី</label
+          >
+          <input
+            type="text"
+            id="location"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
+          />
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2"
+              >ម៉ោងហែកូនកំលោះ</label
+            >
+            <input
+              type="text"
+              id="timeMorning"
+              placeholder="៧:០០ ព្រឹក"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2"
+              >ម៉ោងពិសាភោជនាហារ</label
+            >
+            <input
+              type="text"
+              id="timeEvening"
+              placeholder="៤:០០ រសៀល"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-bold text-gray-700 mb-2"
+            >តំណភ្ជាប់ផែនទី (Google Maps Embed URL)</label
+          >
+          <input
+            type="url"
+            id="mapUrl"
+            placeholder="https://www.google.com/maps/embed?pb=..."
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
+          />
+        </div>
+
+        <button
+          type="submit"
+          class="w-full py-3 bg-amber-600 text-white font-bold rounded-lg hover:bg-amber-700 transition"
+        >
+          រក្សាទុកព័ត៌មាន (Save)
+        </button>
+      </form>
+
+      <!-- RSVP List Section -->
+      <div class="mt-12 border-t pt-8">
+        <h2 class="font-moul text-xl text-amber-600 mb-6">បញ្ជីឈ្មោះភ្ញៀវដែលបានបញ្ជាក់ការចូលរួម</h2>
+        <div class="bg-gray-50 rounded-xl p-4 max-h-96 overflow-y-auto">
+          <ul id="rsvp-list" class="divide-y divide-gray-200">
+            <li class="py-4 text-gray-500 text-center text-sm">កំពុងទាញយកទិន្នន័យ...</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import {
+        db,
+        doc,
+        getDoc,
+        setDoc,
+        auth,
+        signInWithEmailAndPassword,
+        onAuthStateChanged,
+        signOut,
+        collection,
+        query,
+        orderBy,
+        onSnapshot
+      } from "./js/firebase-config.js";
+      lucide.createIcons();
+
+      const docRef = doc(db, "wedding", "details");
+      const form = document.getElementById("dashboard-form");
+      const loading = document.getElementById("loading");
+      const successMsg = document.getElementById("success-msg");
+      const errorMsg = document.getElementById("error-msg");
+
+      const loginSection = document.getElementById("login-section");
+      const dashboardSection = document.getElementById("dashboard-section");
+      const loginForm = document.getElementById("login-form");
+      const loginError = document.getElementById("login-error");
+      const logoutBtn = document.getElementById("logout-btn");
+
+      // Load existing data
+      async function loadData() {
+        try {
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            document.getElementById("groomName").value = data.groomName || "";
+            document.getElementById("brideName").value = data.brideName || "";
+            document.getElementById("eventDate").value = data.eventDate || "";
+            document.getElementById("location").value = data.location || "";
+            document.getElementById("timeMorning").value =
+              data.timeMorning || "";
+            document.getElementById("timeEvening").value =
+              data.timeEvening || "";
+            document.getElementById("mapUrl").value = data.mapUrl || "";
+          }
+        } catch (error) {
+          console.error("Error loading document: ", error);
+        }
+      }
+
+      // Listen for RSVPs
+      let unsubscribeRsvps = null;
+      function listenToRSVPs() {
+        const rsvpsQuery = query(collection(db, "rsvps"), orderBy("timestamp", "desc"));
+        unsubscribeRsvps = onSnapshot(rsvpsQuery, (querySnapshot) => {
+          const rsvpList = document.getElementById("rsvp-list");
+          rsvpList.innerHTML = ""; // Clear existing
+
+          if (querySnapshot.empty) {
+            rsvpList.innerHTML = '<li class="py-4 text-gray-500 text-center text-sm">មិនទាន់មានភ្ញៀវចុះឈ្មោះនៅឡើយទេ</li>';
+            return;
+          }
+
+          let count = 0;
+          querySnapshot.forEach((doc) => {
+            count++;
+            const data = doc.data();
+            const date = data.timestamp ? data.timestamp.toDate().toLocaleString('km-KH') : 'N/A';
+            const typeLabel = data.type === 'couple' ? '<span class="px-2 py-1 bg-amber-100 text-amber-800 text-xs rounded-full ml-2">មកជាគូ</span>' : '<span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full ml-2">មកម្នាក់ឯង</span>';
+            
+            const li = document.createElement("li");
+            li.className = "py-3 flex items-center justify-between";
+            li.innerHTML = `
+              <div class="flex items-center">
+                <span class="text-gray-400 w-6 text-sm">${count}.</span>
+                <span class="font-bold text-gray-800 ml-2">${data.displayName}</span>
+                ${typeLabel}
+              </div>
+              <div class="text-xs text-gray-400">${date}</div>
+            `;
+            rsvpList.appendChild(li);
+          });
+        });
+      }
+
+      // Listen for Authentication State Changes
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          // User is logged in
+          loginSection.classList.add("hidden");
+          dashboardSection.classList.remove("hidden");
+          loadData();
+          listenToRSVPs();
+        } else {
+          // User is logged out
+          loginSection.classList.remove("hidden");
+          dashboardSection.classList.add("hidden");
+          if(unsubscribeRsvps) {
+             unsubscribeRsvps();
+             unsubscribeRsvps = null;
+          }
+        }
+      });
+
+      // Handle Login
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+          loginError.classList.add("hidden");
+        } catch (error) {
+          console.error("Login Error: ", error);
+          loginError.classList.remove("hidden");
+        }
+      });
+
+      // Handle Logout
+      logoutBtn.addEventListener("click", () => {
+        signOut(auth);
+      });
+
+      // Save data
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        loading.classList.remove("hidden");
+        successMsg.classList.add("hidden");
+        errorMsg.classList.add("hidden");
+
+        const newData = {
+          groomName: document.getElementById("groomName").value,
+          brideName: document.getElementById("brideName").value,
+          eventDate: document.getElementById("eventDate").value,
+          location: document.getElementById("location").value,
+          timeMorning: document.getElementById("timeMorning").value,
+          timeEvening: document.getElementById("timeEvening").value,
+          mapUrl: document.getElementById("mapUrl").value,
+        };
+
+        try {
+          await setDoc(docRef, newData);
+          loading.classList.add("hidden");
+          successMsg.classList.remove("hidden");
+          setTimeout(() => successMsg.classList.add("hidden"), 3000);
+        } catch (error) {
+          console.error("Error writing document: ", error);
+          loading.classList.add("hidden");
+          errorMsg.classList.remove("hidden");
+        }
+      });
+    </script>
+  </body>
+</html>
