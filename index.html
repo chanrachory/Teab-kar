@@ -435,6 +435,18 @@
       import { db, doc, onSnapshot, collection, addDoc } from "./js/firebase-config.js";
 
       // Global function to be called from the HTML module context
+      function alreadySubmitted(name) {
+        const cacheKey = "wedding-rsvp-submitted";
+        const existing = JSON.parse(localStorage.getItem(cacheKey) || "[]");
+        const normalized = name.toLowerCase().trim();
+        if (existing.includes(normalized)) {
+          return true;
+        }
+        existing.push(normalized);
+        localStorage.setItem(cacheKey, JSON.stringify(existing.slice(-20)));
+        return false;
+      }
+
       window.generateCard = async function() {
         let finalName = "";
         let type = selectionType;
@@ -452,6 +464,10 @@
              if(btnCouple) btnCouple.disabled = false;
              return alert("សូមបំពេញឈ្មោះទាំងពីរ!");
           }
+          if (alreadySubmitted(n1.toLowerCase() + "|" + n2.toLowerCase())) {
+            if(btnCouple) btnCouple.disabled = false;
+            return alert("អ្នកបានបញ្ជាក់ការចូលរួមរួចហើយ!\nសូមមិនបញ្ជាក់ម្តងទៀត។");
+          }
           finalName = n1 + " & " + n2;
           guestData.type = "couple";
           guestData.name1 = n1;
@@ -462,6 +478,10 @@
           if (!n) {
              if(btnSingle) btnSingle.disabled = false;
              return alert("សូមបញ្ចូលឈ្មោះរបស់អ្នក!");
+          }
+          if (alreadySubmitted(n)) {
+            if(btnSingle) btnSingle.disabled = false;
+            return alert("អ្នកបានបញ្ជាក់ការចូលរួមរួចហើយ!\nសូមមិនបញ្ជាក់ម្តងទៀត។");
           }
           finalName = n;
           guestData.type = "single";

@@ -9,7 +9,11 @@ import {
   collection,
   addDoc,
   query,
-  orderBy
+  orderBy,
+  deleteDoc,
+  updateDoc,
+  getDocs,
+  where
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 import {
   getAuth,
@@ -34,4 +38,4 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-export { db, doc, getDoc, setDoc, onSnapshot, collection, addDoc, query, orderBy, auth, signInWithEmailAndPassword, onAuthStateChanged, signOut };
+export { db, doc, getDoc, setDoc, onSnapshot, collection, addDoc, query, orderBy, deleteDoc, updateDoc, getDocs, where, auth, signInWithEmailAndPassword, onAuthStateChanged, signOut };
