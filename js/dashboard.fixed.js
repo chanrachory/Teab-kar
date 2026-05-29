@@ -384,6 +384,18 @@ function listenToEvents() {
   const q = query(eventRef, orderBy("createdAt", "desc"));
   unsubscribeEvents = onSnapshot(q, (snapshot) => {
     allEvents = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
+    // ensure consistent ordering by `order` when available
+    allEvents.sort((a, b) => {
+      if (typeof a.order === "number" && typeof b.order === "number")
+        return a.order - b.order;
+      const ta = a.createdAt?.toDate
+        ? a.createdAt.toDate().getTime()
+        : new Date(a.createdAt || 0).getTime();
+      const tb = b.createdAt?.toDate
+        ? b.createdAt.toDate().getTime()
+        : new Date(b.createdAt || 0).getTime();
+      return tb - ta; // fallback: newest first
+    });
     renderEvents();
   });
 }
@@ -394,11 +406,28 @@ function renderEvents() {
       '<div class="rounded-2xl border border-dashed border-slate-300 p-6 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-300">No events yet. Click “បន្ថែមកម្មវិធី” to create one.</div>';
     return;
   }
-  elements.eventsContainer.innerHTML = allEvents
-    .map(
-      (eventItem) =>
-        `<article class="rounded-3xl border border-slate-200 bg-slate-50 p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800/70"><div class="flex items-start justify-between gap-3"><div class="flex items-start gap-3"><div class="rounded-2xl bg-amber-100 p-3 text-amber-700 dark:bg-amber-500/10 dark:text-amber-200"><i data-lucide="${eventItem.icon || "flower-2"}" class="h-5 w-5"></i></div><div><h3 class="text-lg font-semibold text-slate-900 dark:text-white">${eventItem.title}</h3><p class="text-sm text-amber-600 dark:text-amber-300">${eventItem.time}</p><p class="mt-2 text-sm text-slate-600 dark:text-slate-300">${eventItem.desc}</p></div></div><div class="flex gap-2"><button data-action="edit-event" data-id="${eventItem.id}" class="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">Edit</button><button data-action="delete-event" data-id="${eventItem.id}" class="rounded-xl border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-200 dark:hover:bg-red-500/10">Delete</button></div></div></article>`,
-    )
+  // Render events in order (by `order` then fallback to createdAt desc)
+  const sorted = allEvents.slice().sort((a, b) => {
+    if (typeof a.order === "number" && typeof b.order === "number")
+      return a.order - b.order;
+    const ta = a.createdAt?.toDate
+      ? a.createdAt.toDate().getTime()
+      : new Date(a.createdAt || 0).getTime();
+    const tb = b.createdAt?.toDate
+      ? b.createdAt.toDate().getTime()
+      : new Date(b.createdAt || 0).getTime();
+    return tb - ta;
+  });
+
+  elements.eventsContainer.innerHTML = sorted
+    .map((eventItem) => {
+      return `<article class="rounded-3xl border border-slate-200 bg-slate-50 p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800/70"><div class="flex items-start justify-between gap-3"><div class="flex items-start gap-3"><div class="rounded-2xl bg-amber-100 p-3 text-amber-700 dark:bg-amber-500/10 dark:text-amber-200"><i data-lucide="${eventItem.icon || "flower-2"}" class="h-5 w-5"></i></div><div><h3 class="text-lg font-semibold text-slate-900 dark:text-white">${eventItem.title}</h3><p class="text-sm text-amber-600 dark:text-amber-300">${eventItem.time}</p><p class="mt-2 text-sm text-slate-600 dark:text-slate-300">${eventItem.desc}</p></div></div><div class="flex gap-2">
+          <button data-action="move-up" data-id="${eventItem.id}" title="Move up" class="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200">↑</button>
+          <button data-action="move-down" data-id="${eventItem.id}" title="Move down" class="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200">↓</button>
+          <button data-action="edit-event" data-id="${eventItem.id}" class="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">Edit</button>
+          <button data-action="delete-event" data-id="${eventItem.id}" class="rounded-xl border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-200 dark:hover:bg-red-500/10">Delete</button>
+        </div></div></article>`;
+    })
     .join("");
   lucide.createIcons();
 }
@@ -959,8 +988,9 @@ function attachEvents() {
     if (event.target === elements.eventModal) closeEventModal();
   });
   elements.eventsContainer.addEventListener("click", async (event) => {
-    const action = event.target.closest("button")?.dataset.action;
-    const id = event.target.closest("button")?.dataset.id;
+    const btn = event.target.closest("button");
+    const action = btn?.dataset.action;
+    const id = btn?.dataset.id;
     if (!action || !id) return;
     const item = allEvents.find((entry) => entry.id === id);
     if (!item) return;
@@ -983,6 +1013,60 @@ function attachEvents() {
       return;
     }
     if (action === "edit-event") openEventModal("edit", item);
+    if (action === "move-up" || action === "move-down") {
+      // find index in the current sorted order
+      const sorted = allEvents.slice().sort((a, b) => {
+        if (typeof a.order === "number" && typeof b.order === "number")
+          return a.order - b.order;
+        const ta = a.createdAt?.toDate
+          ? a.createdAt.toDate().getTime()
+          : new Date(a.createdAt || 0).getTime();
+        const tb = b.createdAt?.toDate
+          ? b.createdAt.toDate().getTime()
+          : new Date(b.createdAt || 0).getTime();
+        return tb - ta;
+      });
+      const idx = sorted.findIndex((e) => e.id === id);
+      if (idx === -1) return;
+      const swapWith = action === "move-up" ? idx - 1 : idx + 1;
+      if (swapWith < 0 || swapWith >= sorted.length) return;
+      // swap order values
+      const a = sorted[idx];
+      const b = sorted[swapWith];
+      const aOrder =
+        typeof a.order === "number"
+          ? a.order
+          : a.createdAt?.toDate
+            ? a.createdAt.toDate().getTime()
+            : new Date(a.createdAt || 0).getTime();
+      const bOrder =
+        typeof b.order === "number"
+          ? b.order
+          : b.createdAt?.toDate
+            ? b.createdAt.toDate().getTime()
+            : new Date(b.createdAt || 0).getTime();
+      if (localStorage.getItem("dashboard-demo-auth") === "true") {
+        // update local allEvents order fields
+        allEvents = allEvents.map((ev) => {
+          if (ev.id === a.id) return { ...ev, order: bOrder };
+          if (ev.id === b.id) return { ...ev, order: aOrder };
+          return ev;
+        });
+        saveStoredEvents(allEvents);
+        renderEvents();
+        showToast("Event order updated", "success");
+        return;
+      }
+      try {
+        await updateDoc(doc(db, "events", a.id), { order: bOrder });
+        await updateDoc(doc(db, "events", b.id), { order: aOrder });
+        showToast("Event order updated", "success");
+      } catch (err) {
+        console.error(err);
+        showToast("Unable to update event order", "error");
+      }
+      return;
+    }
   });
   // Media grid deletion (remove from Firestore galleryImages array)
   elements.mediaGrid?.addEventListener("click", async (e) => {
@@ -1035,10 +1119,18 @@ function attachEvents() {
             entry.id === id ? { ...entry, ...payload } : entry,
           );
         } else {
-          allEvents = [
-            { id: `event-${Date.now()}`, ...payload, createdAt: new Date() },
-            ...allEvents,
-          ];
+          // assign incremental order value
+          const maxOrder = allEvents.reduce(
+            (m, e) => Math.max(m, typeof e.order === "number" ? e.order : 0),
+            0,
+          );
+          const newEvent = {
+            id: `event-${Date.now()}`,
+            ...payload,
+            createdAt: new Date(),
+            order: maxOrder + 1,
+          };
+          allEvents = [...allEvents, newEvent];
         }
         saveStoredEvents(allEvents);
         renderEvents();
@@ -1047,7 +1139,24 @@ function attachEvents() {
         return;
       }
       if (id) await updateDoc(doc(db, "events", id), payload);
-      else await addDoc(eventRef, { ...payload, createdAt: new Date() });
+      else {
+        // compute order based on current events (fetching max order is best-effort)
+        let orderVal = 1;
+        try {
+          const snap = await getDoc(docRef);
+          // don't rely on docRef; instead try to derive from local allEvents
+          const maxOrder = allEvents.reduce(
+            (m, e) => Math.max(m, typeof e.order === "number" ? e.order : 0),
+            0,
+          );
+          orderVal = maxOrder + 1;
+        } catch (_) {}
+        await addDoc(eventRef, {
+          ...payload,
+          createdAt: new Date(),
+          order: orderVal,
+        });
+      }
       closeEventModal();
       showToast(id ? "Event updated" : "Event added", "success");
     } catch (error) {
