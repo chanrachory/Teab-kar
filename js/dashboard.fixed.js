@@ -69,6 +69,12 @@ const elements = {
   dashboardForm: document.getElementById("dashboard-form"),
   coverImageInput: document.getElementById("cover-image-input"),
   coverImagePreview: document.getElementById("cover-image-preview"),
+  groomPhotoInput: document.getElementById("groom-photo-input"),
+  bridePhotoInput: document.getElementById("bride-photo-input"),
+  groomPhotoPreview: document.getElementById("groom-photo-preview"),
+  bridePhotoPreview: document.getElementById("bride-photo-preview"),
+  groomBio: document.getElementById("groom-bio"),
+  brideBio: document.getElementById("bride-bio"),
   // Media panel elements
   galleryInput: document.getElementById("gallery-input"),
   galleryPreviewList: document.getElementById("gallery-preview-list"),
@@ -81,6 +87,14 @@ const elements = {
   mediaLatestEmpty: document.getElementById("media-latest-empty"),
   mediaGrid: document.getElementById("media-grid"),
   mediaEmpty: document.getElementById("media-empty"),
+  mediaGroomImg: document.getElementById("media-groom-img"),
+  mediaGroomEmpty: document.getElementById("media-groom-empty"),
+  mediaGroomName: document.getElementById("media-groom-name"),
+  mediaGroomBio: document.getElementById("media-groom-bio"),
+  mediaBrideImg: document.getElementById("media-bride-img"),
+  mediaBrideEmpty: document.getElementById("media-bride-empty"),
+  mediaBrideName: document.getElementById("media-bride-name"),
+  mediaBrideBio: document.getElementById("media-bride-bio"),
   saveBtn:
     document.getElementById("dashboard-save-btn") ||
     document.querySelector("#dashboard-form button[type=submit]"),
@@ -320,6 +334,8 @@ async function loadWeddingDetails() {
       document.getElementById("timeMorning").value = data.timeMorning || "";
       document.getElementById("timeEvening").value = data.timeEvening || "";
       document.getElementById("mapUrl").value = data.mapUrl || "";
+      document.getElementById("groom-bio").value = data.groomBio || "";
+      document.getElementById("bride-bio").value = data.brideBio || "";
       if (data.coverImageUrl) {
         elements.coverImagePreview.src = data.coverImageUrl;
         elements.coverImagePreview.classList.remove("hidden");
@@ -451,6 +467,47 @@ function listenToDetails() {
         elements.mediaGrid.innerHTML = "";
         elements.mediaEmpty.classList.remove("hidden");
       }
+    }
+    // Groom / Bride cards
+    if (elements.mediaGroomImg) {
+      if (data.groomPhotoUrl) {
+        elements.mediaGroomImg.src = data.groomPhotoUrl;
+        elements.mediaGroomImg.classList.remove("hidden");
+        elements.mediaGroomEmpty.classList.add("hidden");
+      } else if (data.groomPhotoId) {
+        elements.mediaGroomImg.src = getImageUrl(data.groomPhotoId, {
+          width: 600,
+          height: 600,
+          crop: "fill",
+        });
+        elements.mediaGroomImg.classList.remove("hidden");
+        elements.mediaGroomEmpty.classList.add("hidden");
+      } else {
+        elements.mediaGroomImg.classList.add("hidden");
+        elements.mediaGroomEmpty.classList.remove("hidden");
+      }
+      elements.mediaGroomName.textContent = data.groomName || "";
+      elements.mediaGroomBio.textContent = data.groomBio || "";
+    }
+    if (elements.mediaBrideImg) {
+      if (data.bridePhotoUrl) {
+        elements.mediaBrideImg.src = data.bridePhotoUrl;
+        elements.mediaBrideImg.classList.remove("hidden");
+        elements.mediaBrideEmpty.classList.add("hidden");
+      } else if (data.bridePhotoId) {
+        elements.mediaBrideImg.src = getImageUrl(data.bridePhotoId, {
+          width: 600,
+          height: 600,
+          crop: "fill",
+        });
+        elements.mediaBrideImg.classList.remove("hidden");
+        elements.mediaBrideEmpty.classList.add("hidden");
+      } else {
+        elements.mediaBrideImg.classList.add("hidden");
+        elements.mediaBrideEmpty.classList.remove("hidden");
+      }
+      elements.mediaBrideName.textContent = data.brideName || "";
+      elements.mediaBrideBio.textContent = data.brideBio || "";
     }
   });
 }
@@ -673,6 +730,53 @@ function attachEvents() {
     }
   });
 
+  // Groom/bride preview handling
+  let groomPreviewUrl = null;
+  let bridePreviewUrl = null;
+  elements.groomPhotoInput?.addEventListener("change", (event) => {
+    const [file] = event.target.files || [];
+    if (!file) {
+      if (groomPreviewUrl) {
+        URL.revokeObjectURL(groomPreviewUrl);
+        groomPreviewUrl = null;
+      }
+      elements.groomPhotoPreview.classList.add("hidden");
+      elements.groomPhotoPreview.src = "";
+      return;
+    }
+    try {
+      if (groomPreviewUrl) URL.revokeObjectURL(groomPreviewUrl);
+      groomPreviewUrl = previewImage(file);
+      elements.groomPhotoPreview.src = groomPreviewUrl;
+      elements.groomPhotoPreview.classList.remove("hidden");
+    } catch (err) {
+      console.error("Groom preview failed:", err);
+      elements.groomPhotoPreview.classList.add("hidden");
+    }
+  });
+
+  elements.bridePhotoInput?.addEventListener("change", (event) => {
+    const [file] = event.target.files || [];
+    if (!file) {
+      if (bridePreviewUrl) {
+        URL.revokeObjectURL(bridePreviewUrl);
+        bridePreviewUrl = null;
+      }
+      elements.bridePhotoPreview.classList.add("hidden");
+      elements.bridePhotoPreview.src = "";
+      return;
+    }
+    try {
+      if (bridePreviewUrl) URL.revokeObjectURL(bridePreviewUrl);
+      bridePreviewUrl = previewImage(file);
+      elements.bridePhotoPreview.src = bridePreviewUrl;
+      elements.bridePhotoPreview.classList.remove("hidden");
+    } catch (err) {
+      console.error("Bride preview failed:", err);
+      elements.bridePhotoPreview.classList.add("hidden");
+    }
+  });
+
   // Gallery preview handling (multiple files)
   let galleryPreviewUrls = [];
   elements.galleryInput?.addEventListener("change", (event) => {
@@ -785,10 +889,39 @@ function attachEvents() {
         }
       }
 
+      // groom/bride image uploads (optional)
+      const groomFile = elements.groomPhotoInput?.files?.[0];
+      let groomPhotoUrl = existingData.groomPhotoUrl || "";
+      let groomPhotoId = existingData.groomPhotoId || "";
+      if (groomFile) {
+        try {
+          const res = await uploadImage(groomFile);
+          groomPhotoUrl = res.secure_url || groomPhotoUrl;
+          groomPhotoId = res.public_id || groomPhotoId;
+        } catch (err) {
+          console.error("Groom image upload failed", err);
+        }
+      }
+
+      const brideFile = elements.bridePhotoInput?.files?.[0];
+      let bridePhotoUrl = existingData.bridePhotoUrl || "";
+      let bridePhotoId = existingData.bridePhotoId || "";
+      if (brideFile) {
+        try {
+          const res = await uploadImage(brideFile);
+          bridePhotoUrl = res.secure_url || bridePhotoUrl;
+          bridePhotoId = res.public_id || bridePhotoId;
+        } catch (err) {
+          console.error("Bride image upload failed", err);
+        }
+      }
+
       // Save wedding details with coverImageUrl (secure) and public id
       await setDoc(docRef, {
         groomName: document.getElementById("groomName").value,
         brideName: document.getElementById("brideName").value,
+        groomBio: document.getElementById("groom-bio").value || "",
+        brideBio: document.getElementById("bride-bio").value || "",
         eventDate: document.getElementById("eventDate").value,
         location: document.getElementById("location").value,
         timeMorning: document.getElementById("timeMorning").value,
@@ -796,6 +929,10 @@ function attachEvents() {
         mapUrl: document.getElementById("mapUrl").value,
         coverImageUrl: coverImageUrl || "",
         coverImageId: coverImageId || "",
+        groomPhotoUrl: groomPhotoUrl || "",
+        groomPhotoId: groomPhotoId || "",
+        bridePhotoUrl: bridePhotoUrl || "",
+        bridePhotoId: bridePhotoId || "",
       });
 
       elements.loading.classList.add("hidden");

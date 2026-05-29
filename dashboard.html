@@ -431,6 +431,62 @@
                   />
                 </div>
               </div>
+              <div class="grid gap-4 md:grid-cols-2 mt-2">
+                <div>
+                  <label class="mb-2 block text-sm font-semibold"
+                    >រូបកូនកំលោះ</label
+                  >
+                  <input
+                    id="groom-photo-input"
+                    type="file"
+                    accept="image/*"
+                    class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-slate-700"
+                  />
+                  <img
+                    id="groom-photo-preview"
+                    class="mt-2 hidden h-28 w-full object-cover rounded-lg"
+                    alt="Groom preview"
+                  />
+                </div>
+                <div>
+                  <label class="mb-2 block text-sm font-semibold"
+                    >រូបកូនក្រមុំ</label
+                  >
+                  <input
+                    id="bride-photo-input"
+                    type="file"
+                    accept="image/*"
+                    class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-slate-700"
+                  />
+                  <img
+                    id="bride-photo-preview"
+                    class="mt-2 hidden h-28 w-full object-cover rounded-lg"
+                    alt="Bride preview"
+                  />
+                </div>
+              </div>
+              <div class="grid gap-4 md:grid-cols-2 mt-2">
+                <div>
+                  <label class="mb-2 block text-sm font-semibold"
+                    >ព័ត៌មានកូនកំលោះ (Detail)</label
+                  >
+                  <textarea
+                    id="groom-bio"
+                    rows="3"
+                    class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none"
+                  ></textarea>
+                </div>
+                <div>
+                  <label class="mb-2 block text-sm font-semibold"
+                    >ព័ត៌មានកូនក្រមុំ (Detail)</label
+                  >
+                  <textarea
+                    id="bride-bio"
+                    rows="3"
+                    class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none"
+                  ></textarea>
+                </div>
+              </div>
               <div>
                 <label class="mb-2 block text-sm font-semibold"
                   >កាលបរិច្ឆេទ</label
@@ -565,6 +621,64 @@
               Wedding Media Preview
             </h2>
             <div class="mt-4 grid gap-4">
+              <div
+                class="rounded-2xl overflow-hidden border border-white/5 p-3 bg-white/5 flex gap-3"
+              >
+                <div
+                  id="media-groom-card"
+                  class="flex-1 rounded-xl overflow-hidden bg-black/10 p-3 text-center"
+                >
+                  <p class="text-xs text-slate-300 mb-2">Groom</p>
+                  <div
+                    class="w-full h-32 rounded-xl overflow-hidden bg-black/20 flex items-center justify-center"
+                  >
+                    <img
+                      id="media-groom-img"
+                      src=""
+                      alt="Groom"
+                      class="object-cover w-full h-full hidden"
+                    />
+                    <div id="media-groom-empty" class="text-slate-400">
+                      No groom image
+                    </div>
+                  </div>
+                  <p
+                    id="media-groom-name"
+                    class="mt-2 text-sm text-slate-200"
+                  ></p>
+                  <p
+                    id="media-groom-bio"
+                    class="mt-1 text-xs text-slate-400"
+                  ></p>
+                </div>
+                <div
+                  id="media-bride-card"
+                  class="flex-1 rounded-xl overflow-hidden bg-black/10 p-3 text-center"
+                >
+                  <p class="text-xs text-slate-300 mb-2">Bride</p>
+                  <div
+                    class="w-full h-32 rounded-xl overflow-hidden bg-black/20 flex items-center justify-center"
+                  >
+                    <img
+                      id="media-bride-img"
+                      src=""
+                      alt="Bride"
+                      class="object-cover w-full h-full hidden"
+                    />
+                    <div id="media-bride-empty" class="text-slate-400">
+                      No bride image
+                    </div>
+                  </div>
+                  <p
+                    id="media-bride-name"
+                    class="mt-2 text-sm text-slate-200"
+                  ></p>
+                  <p
+                    id="media-bride-bio"
+                    class="mt-1 text-xs text-slate-400"
+                  ></p>
+                </div>
+              </div>
               <div
                 class="rounded-2xl overflow-hidden border border-white/5 p-3 bg-white/5"
               >
