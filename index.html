@@ -5,125 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>សិរីមង្គលអាពាហ៍ពិពាហ៍</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Moul&family=Kantumruy+Pro:wght@300;400;700&display=swap"
-      rel="stylesheet"
+    <!-- SEO & Open Graph Meta Tags -->
+    <meta
+      name="description"
+      content="សូមគោរពអញ្ជើញចូលរួមពិធីសិរីមង្គលអាពាហ៍ពិពាហ៍របស់យើងខ្ញុំ"
     />
+    <meta property="og:title" content="សិរីមង្គលអាពាហ៍ពិពាហ៍" />
+    <meta
+      property="og:description"
+      content="សូមគោរពអញ្ជើញចូលរួមពិធីសិរីមង្គលអាពាហ៍ពិពាហ៍របស់យើងខ្ញុំ។ សូមបញ្ជាក់ការចូលរួមរបស់អ្នកនៅទីនេះ។"
+    />
+    <meta
+      property="og:image"
+      content="https://res.cloudinary.com/demo/image/upload/w_1200,h_630,c_fill/wedding/prewedding-1"
+    />
+    <meta property="og:url" content="https://your-domain.com" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              gold: {
+                DEFAULT: "#d4af37",
+                light: "#f3d573",
+                dark: "#aa8c2c",
+              },
+            },
+            fontFamily: {
+              moul: ["Moul", "serif"],
+              kantumruy: ["Kantumruy Pro", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="stylesheet" href="styles/main.css" />
     <script src="https://unpkg.com/lucide@latest"></script>
-
-    <style>
-      ::root {
-        --gold: #d4af37;
-      }
-
-      body {
-        font-family: "Kantumruy Pro", sans-serif;
-        margin: 0;
-        background: #000;
-        color: white;
-        overflow-x: hidden;
-      }
-
-      .font-moul {
-        font-family: "Moul", serif;
-      }
-
-      .hero-bg {
-        background:
-          linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8)),
-          url("https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=2000");
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
-        min-height: 100vh;
-        width: 100%;
-      }
-
-      .glass-box {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-      }
-
-      .gold-text {
-        color: var(--gold);
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
-      }
-
-      #initial-overlay {
-        position: fixed;
-        inset: 0;
-        z-index: 1000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.8s ease;
-      }
-
-      .guest-box {
-        border: 2px solid rgba(212, 175, 55, 0.5);
-        padding: 12px 30px;
-        background: rgba(0, 0, 0, 0.3);
-        border-radius: 9999px;
-        display: inline-block;
-      }
-
-      .fade-in {
-        animation: fadeIn 1.2s ease forwards;
-      }
-
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .music-playing {
-        animation: rotate 4s linear infinite;
-      }
-
-      @keyframes rotate {
-        from {
-          transform: rotate(0deg);
-        }
-
-        to {
-          transform: rotate(360deg);
-        }
-      }
-
-      #music-control {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        z-index: 1001;
-        background: rgba(212, 175, 55, 0.8);
-        width: 45px;
-        height: 45px;
-        border-radius: 50%;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        border: 2px solid white;
-      }
-
-      @media (max-width: 600px) {
-        .date_text {
-          font-size: 15px !important;
-        }
-      }
-    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   </head>
 
   <body>
@@ -175,6 +97,13 @@
           >
             មកជាមួយដៃគូរ😎
           </button>
+
+          <button
+            onclick="selectType('decline')"
+            class="w-full py-4 bg-red-600/20 text-red-400 rounded-2xl border border-red-500/30 hover:bg-red-600/30 transition-all duration-300"
+          >
+            មិនអាចចូលរួមបានទេ 🙏
+          </button>
         </div>
 
         <!-- Input Fields for Couple -->
@@ -190,6 +119,28 @@
             id="name2"
             placeholder="ឈ្មោះដៃគូ"
             class="w-full px-5 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-amber-400 transition-colors"
+          />
+          <label class="block text-left text-gray-300 text-xs mt-2 mb-1"
+            >ចំនួនភ្ញៀវ</label
+          >
+          <input
+            type="number"
+            id="guest-count-couple"
+            min="1"
+            max="20"
+            value="2"
+            class="w-full px-5 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-amber-400 transition-colors mb-2"
+          />
+          <label class="block text-left text-gray-300 text-xs mb-1"
+            >លេខតុ</label
+          >
+          <input
+            type="number"
+            id="table-estimate-couple"
+            min="1"
+            max="10"
+            value="1"
+            class="w-full px-5 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-amber-400 transition-colors mb-2"
           />
           <button
             id="btn-couple-submit"
@@ -213,11 +164,76 @@
             placeholder="បញ្ចូលឈ្មោះរបស់អ្នក"
             class="w-full px-5 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-amber-400 transition-colors"
           />
-      <button
+          <label class="block text-left text-gray-300 text-xs mt-2 mb-1"
+            >ចំនួនភ្ញៀវ</label
+          >
+          <input
+            type="number"
+            id="guest-count-single"
+            min="1"
+            max="20"
+            value="1"
+            class="w-full px-5 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-amber-400 transition-colors mb-2"
+          />
+          <!-- <label class="block text-left text-gray-300 text-xs mb-1"
+            >លេខតុ</label
+          >
+          <input
+            type="number"
+            id="table-estimate-single"
+            min="1"
+            max="10"
+            value="1"
+            class="w-full px-5 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-amber-400 transition-colors mb-2"
+          /> -->
+          <button
             id="btn-single-submit"
             class="w-full py-4 bg-amber-600 rounded-xl font-bold hover:bg-amber-700 shadow-lg active:scale-95"
           >
             រួចរាល់
+          </button>
+          <button
+            onclick="resetSelection()"
+            class="text-sm text-gray-400 underline block w-full"
+          >
+            ត្រឡប់ក្រោយ
+          </button>
+        </div>
+
+        <!-- Input for Decline -->
+        <div id="decline-confirm" class="mt-8 hidden space-y-4 fade-in">
+          <p class="text-sm text-gray-300">
+            យើងខ្ញុំពិតជាសោកស្តាយ ដែលលោកអ្នកមិនអាចចូលរួមបាន។
+          </p>
+          <input
+            type="text"
+            id="decline-name"
+            placeholder="បញ្ចូលឈ្មោះរបស់អ្នក"
+            class="w-full px-5 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-red-400 transition-colors"
+          />
+          <div class="grid grid-cols-2 gap-3">
+            <input
+              type="number"
+              id="guest-count-decline"
+              min="1"
+              max="20"
+              value="1"
+              class="w-full px-5 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-red-400 transition-colors"
+            />
+            <input
+              type="number"
+              id="table-estimate-decline"
+              min="1"
+              max="10"
+              value="1"
+              class="w-full px-5 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-red-400 transition-colors"
+            />
+          </div>
+          <button
+            id="btn-decline-submit"
+            class="w-full py-4 bg-red-600 rounded-xl font-bold hover:bg-red-700 shadow-lg active:scale-95"
+          >
+            បញ្ជាក់
           </button>
           <button
             onclick="resetSelection()"
@@ -268,12 +284,22 @@
           <p class="text-lg md:text-xl mb-6 italic text-gray-300">
             សូមគោរពអញ្ជើញ
           </p>
-          <div class="guest-box mb-12">
+          <div class="guest-box mb-6">
             <span
               id="final-guest-name"
               class="text-2xl sm:text-4xl font-bold tracking-widest text-white"
               >ភ្ញៀវកិត្តិយស</span
             >
+          </div>
+
+          <div
+            id="qr-code-container"
+            class="mb-12 flex flex-col items-center justify-center hidden"
+          >
+            <p class="text-sm text-amber-400 mb-3 font-kantumruy">
+              QR Code សម្រាប់ស្កេនចូលរួម
+            </p>
+            <div id="qrcode" class="p-3 bg-white rounded-xl shadow-2xl"></div>
           </div>
 
           <div
@@ -288,68 +314,356 @@
             <p id="location-display" class="text-gray-200 text-sm sm:text-lg">
               ភូមិរោងធិ៍រោង ឃុំជីផុច ស្រុកមេសាង ខេត្តព្រៃវែង
             </p>
+
+            <!-- Countdown Timer -->
+            <div class="mt-8 grid grid-cols-4 gap-4 text-amber-500 font-moul">
+              <div
+                class="bg-black/60 p-4 rounded-xl border border-amber-500/30"
+              >
+                <div id="countdown-days" class="text-2xl sm:text-4xl">00</div>
+                <div
+                  class="text-xs sm:text-sm text-gray-400 mt-1 font-kantumruy"
+                >
+                  ថ្ងៃ
+                </div>
+              </div>
+              <div
+                class="bg-black/60 p-4 rounded-xl border border-amber-500/30"
+              >
+                <div id="countdown-hours" class="text-2xl sm:text-4xl">00</div>
+                <div
+                  class="text-xs sm:text-sm text-gray-400 mt-1 font-kantumruy"
+                >
+                  ម៉ោង
+                </div>
+              </div>
+              <div
+                class="bg-black/60 p-4 rounded-xl border border-amber-500/30"
+              >
+                <div id="countdown-minutes" class="text-2xl sm:text-4xl">
+                  00
+                </div>
+                <div
+                  class="text-xs sm:text-sm text-gray-400 mt-1 font-kantumruy"
+                >
+                  នាទី
+                </div>
+              </div>
+              <div
+                class="bg-black/60 p-4 rounded-xl border border-amber-500/30"
+              >
+                <div id="countdown-seconds" class="text-2xl sm:text-4xl">
+                  00
+                </div>
+                <div
+                  class="text-xs sm:text-sm text-gray-400 mt-1 font-kantumruy"
+                >
+                  វិនាទី
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- BRIDE & GROOM PROFILE -->
+      <section class="py-24 px-6 bg-white text-black relative">
+        <div class="max-w-6xl mx-auto">
+          <div class="text-center px-4 mb-16">
+            <h3
+              class="font-moul sm:text-3xl text-amber-600 underline underline-offset-8 decoration-amber-200/50 leading-loose"
+            >
+              ប្រវត្តិរូបសង្ខេប
+            </h3>
+            <p class="text-gray-500 mt-4 font-kantumruy">
+              កូនកំលោះ និងកូនក្រមុំ
+            </p>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-12 items-center">
+            <!-- Groom -->
+            <div class="flex flex-col items-center group">
+              <div
+                class="w-64 h-64 rounded-full overflow-hidden border-4 border-gold p-1 shadow-2xl mb-6 relative"
+              >
+                <!-- Placeholder image for now -->
+                <img
+                  id="profile-groom-img"
+                  src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=500"
+                  alt="Groom"
+                  class="w-full h-full object-cover rounded-full group-hover:scale-110 transition-transform duration-700"
+                />
+              </div>
+              <h4
+                class="font-moul text-2xl text-amber-800 mb-2"
+                id="profile-groom-name"
+              >
+                ឈ្មោះ កូនកំលោះ
+              </h4>
+              <p
+                id="profile-groom-story"
+                class="text-gray-500 text-center max-w-sm font-kantumruy leading-relaxed"
+              >
+                កូនប្រុសទី១ ក្នុងគ្រួសារ។ បច្ចុប្បន្នជាវិស្វករផ្នែកទន់។
+              </p>
+            </div>
+
+            <!-- Bride -->
+            <div class="flex flex-col items-center group">
+              <div
+                class="w-64 h-64 rounded-full overflow-hidden border-4 border-gold p-1 shadow-2xl mb-6 relative"
+              >
+                <!-- Placeholder image for now -->
+                <img
+                  id="profile-bride-img"
+                  src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=500"
+                  alt="Bride"
+                  class="w-full h-full object-cover rounded-full group-hover:scale-110 transition-transform duration-700"
+                />
+              </div>
+              <h4
+                class="font-moul text-2xl text-amber-800 mb-2"
+                id="profile-bride-name"
+              >
+                ឈ្មោះ កូនក្រមុំ
+              </h4>
+              <p
+                id="profile-bride-story"
+                class="text-gray-500 text-center max-w-sm font-kantumruy leading-relaxed"
+              >
+                កូនស្រីទី២ ក្នុងគ្រួសារ។ បច្ចុប្បន្នជាវេជ្ជបណ្ឌិត។
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CAMBODIAN WEDDING TIMELINE -->
+      <section class="py-24 px-6 bg-slate-50 text-black">
+        <div class="max-w-4xl mx-auto">
+          <div class="text-center px-4 mb-16">
+            <h3
+              class="font-moul sm:text-3xl text-amber-600 underline underline-offset-8 decoration-amber-200/50 leading-loose"
+            >
+              កម្មវិធីតាមប្រពៃណី
+            </h3>
+            <p class="text-gray-500 mt-4 font-kantumruy">
+              លំដាប់លំដោយនៃកម្មវិធី
+            </p>
+          </div>
+
+          <div
+            class="relative border-l-2 border-amber-300 ml-3 md:ml-6 space-y-12"
+          >
+            <!-- Item 1: ក្រុងពាលី -->
+            <div class="relative pl-10 md:pl-16 group">
+              <div
+                class="absolute -left-[11px] bg-amber-500 w-5 h-5 rounded-full border-4 border-white shadow group-hover:scale-125 transition-transform duration-300"
+              ></div>
+              <div
+                class="bg-white p-6 rounded-2xl shadow-lg border border-amber-100 hover:shadow-xl transition-shadow flex gap-4 items-start"
+              >
+                <div
+                  class="bg-amber-50 p-3 rounded-xl text-amber-600 hidden sm:block"
+                >
+                  <i data-lucide="flower-2" class="w-6 h-6"></i>
+                </div>
+                <div>
+                  <h4 class="font-moul text-lg text-amber-700 mb-2">
+                    ពិធីក្រុងពាលី
+                  </h4>
+                  <p class="text-amber-600 font-bold mb-2">ម៉ោង ២:០០ រសៀល</p>
+                  <p class="text-gray-600 text-sm">
+                    ជួបជុំសាច់ញាតិ ដើម្បីសុំសេចក្តីសុខសេចក្តីចម្រើន។
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Item 2: សូត្រមន្ត -->
+            <div class="relative pl-10 md:pl-16 group">
+              <div
+                class="absolute -left-[11px] bg-amber-500 w-5 h-5 rounded-full border-4 border-white shadow group-hover:scale-125 transition-transform duration-300"
+              ></div>
+              <div
+                class="bg-white p-6 rounded-2xl shadow-lg border border-amber-100 hover:shadow-xl transition-shadow flex gap-4 items-start"
+              >
+                <div
+                  class="bg-amber-50 p-3 rounded-xl text-amber-600 hidden sm:block"
+                >
+                  <i data-lucide="sparkles" class="w-6 h-6"></i>
+                </div>
+                <div>
+                  <h4 class="font-moul text-lg text-amber-700 mb-2">
+                    ពិធីសូត្រមន្ត
+                  </h4>
+                  <p class="text-amber-600 font-bold mb-2">ម៉ោង ៤:០០ រសៀល</p>
+                  <p class="text-gray-600 text-sm">
+                    និមន្តព្រះសង្ឃចម្រើនព្រះបរិត្ត។
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Item 3: ហែជំនូន -->
+            <div class="relative pl-10 md:pl-16 group">
+              <div
+                class="absolute -left-[11px] bg-amber-500 w-5 h-5 rounded-full border-4 border-white shadow group-hover:scale-125 transition-transform duration-300"
+              ></div>
+              <div
+                class="bg-white p-6 rounded-2xl shadow-lg border border-amber-100 hover:shadow-xl transition-shadow flex gap-4 items-start"
+              >
+                <div
+                  class="bg-amber-50 p-3 rounded-xl text-amber-600 hidden sm:block"
+                >
+                  <i data-lucide="gift" class="w-6 h-6"></i>
+                </div>
+                <div>
+                  <h4 class="font-moul text-lg text-amber-700 mb-2">
+                    ពិធីហែជំនូន
+                  </h4>
+                  <p class="text-amber-600 font-bold mb-2">
+                    ម៉ោង ៧:០០ ព្រឹក (ថ្ងៃបន្ទាប់)
+                  </p>
+                  <p class="text-gray-600 text-sm">ដង្ហែរជំនូនចូលរោងជ័យ។</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Item 4: កាត់សក់ -->
+            <div class="relative pl-10 md:pl-16 group">
+              <div
+                class="absolute -left-[11px] bg-amber-500 w-5 h-5 rounded-full border-4 border-white shadow group-hover:scale-125 transition-transform duration-300"
+              ></div>
+              <div
+                class="bg-white p-6 rounded-2xl shadow-lg border border-amber-100 hover:shadow-xl transition-shadow flex gap-4 items-start"
+              >
+                <div
+                  class="bg-amber-50 p-3 rounded-xl text-amber-600 hidden sm:block"
+                >
+                  <i data-lucide="scissors" class="w-6 h-6"></i>
+                </div>
+                <div>
+                  <h4 class="font-moul text-lg text-amber-700 mb-2">
+                    ពិធីកាត់សក់
+                  </h4>
+                  <p class="text-amber-600 font-bold mb-2">ម៉ោង ៩:០០ ព្រឹក</p>
+                  <p class="text-gray-600 text-sm">
+                    កាត់សក់បង្កក់សិរី និងបណ្ដេញឧបទ្រពចង្រៃ។
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Item 5: ចងដៃ -->
+            <div class="relative pl-10 md:pl-16 group">
+              <div
+                class="absolute -left-[11px] bg-amber-500 w-5 h-5 rounded-full border-4 border-white shadow group-hover:scale-125 transition-transform duration-300"
+              ></div>
+              <div
+                class="bg-white p-6 rounded-2xl shadow-lg border border-amber-100 hover:shadow-xl transition-shadow flex gap-4 items-start"
+              >
+                <div
+                  class="bg-amber-50 p-3 rounded-xl text-amber-600 hidden sm:block"
+                >
+                  <i data-lucide="gem" class="w-6 h-6"></i>
+                </div>
+                <div>
+                  <h4 class="font-moul text-lg text-amber-700 mb-2">
+                    ពិធីចងដៃ
+                  </h4>
+                  <p class="text-amber-600 font-bold mb-2">ម៉ោង ១០:៣០ ព្រឹក</p>
+                  <p class="text-gray-600 text-sm">
+                    សាច់ញាតិចាស់ទុំចងដៃជូនពរជ័យសិរីសួស្តី។
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Item 6: ពិសាភោជនាហារ -->
+            <div class="relative pl-10 md:pl-16 group">
+              <div
+                class="absolute -left-[11px] bg-amber-500 w-5 h-5 rounded-full border-4 border-white shadow group-hover:scale-125 transition-transform duration-300"
+              ></div>
+              <div
+                class="bg-white p-6 rounded-2xl shadow-lg border border-amber-100 hover:shadow-xl transition-shadow flex gap-4 items-start"
+              >
+                <div
+                  class="bg-amber-50 p-3 rounded-xl text-amber-600 hidden sm:block"
+                >
+                  <i data-lucide="utensils-crossed" class="w-6 h-6"></i>
+                </div>
+                <div>
+                  <h4 class="font-moul text-lg text-amber-700 mb-2">
+                    ពិធីពិសាភោជនាហារ
+                  </h4>
+                  <p class="text-amber-600 font-bold mb-2">ម៉ោង ៤:០០ រសៀល</p>
+                  <p class="text-gray-600 text-sm">
+                    សូមគោរពអញ្ជើញភ្ញៀវកិត្តិយសទាំងអស់ពិសាភោជនាហារ។
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- WEDDING GALLERY -->
+      <section class="py-24 px-6 bg-white text-black relative">
+        <div class="max-w-6xl mx-auto">
+          <div class="text-center px-4 mb-12">
+            <h3
+              class="font-moul sm:text-3xl text-amber-600 underline underline-offset-8 decoration-amber-200/50 leading-loose"
+            >
+              វិចិត្រសាលរូបភាព
+            </h3>
+            <p class="text-gray-500 mt-4 font-kantumruy">
+              អនុស្សាវរីយ៍ដ៏ស្រស់ស្អាតរបស់យើង
+            </p>
+          </div>
+
+          <!-- Gallery Tabs -->
+          <div class="flex justify-center gap-4 mb-10">
+            <button
+              onclick="switchGalleryTab('prewedding')"
+              id="tab-prewedding"
+              class="px-6 py-2 rounded-full border border-amber-500 bg-amber-500 text-white font-kantumruy transition-colors duration-300"
+            >
+              Pre-Wedding
+            </button>
+            <button
+              onclick="switchGalleryTab('ceremony')"
+              id="tab-ceremony"
+              class="px-6 py-2 rounded-full border border-amber-500 bg-transparent text-amber-600 font-kantumruy transition-colors duration-300 hover:bg-amber-50"
+            >
+              Ceremony
+            </button>
+          </div>
+
+          <!-- Gallery Grid -->
+          <div
+            class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+            id="gallery-container"
+          >
+            <!-- Images will be injected here via JavaScript -->
+            <div
+              class="aspect-square bg-gray-100 rounded-2xl overflow-hidden shadow-sm animate-pulse"
+            ></div>
+            <div
+              class="aspect-square bg-gray-100 rounded-2xl overflow-hidden shadow-sm animate-pulse"
+            ></div>
+            <div
+              class="aspect-square bg-gray-100 rounded-2xl overflow-hidden shadow-sm animate-pulse"
+            ></div>
+            <div
+              class="aspect-square bg-gray-100 rounded-2xl overflow-hidden shadow-sm animate-pulse"
+            ></div>
           </div>
         </div>
       </section>
 
       <!-- DETAILS & MAP -->
-      <section class="py-24 px-6 bg-white text-black">
-        <div class="max-w-4xl mx-auto text-center">
-          <div class="text-center px-4">
-            <h3
-              class="font-moul sm:text-3xl text-amber-600 mb-16 underline underline-offset-8 decoration-amber-200/50 leading-loose"
-            >
-              ពេលវេលាកម្មពិធី និង កន្លែងប្រារព្ធ
-            </h3>
-          </div>
-          <div class="grid md:grid-cols-2 gap-8 mb-16">
-            <div
-              class="p-10 border border-amber-100 rounded-[3rem] bg-amber-50/30"
-            >
-              <i
-                data-lucide="sun"
-                class="mx-auto mb-6 text-amber-700 w-12 h-12"
-              ></i>
-              <h4 class="font-moul text-xl mb-4 text-amber-800">
-                ពិធីហែកូនកំលោះ
-              </h4>
-              <p class="text-gray-600 text-lg">
-                ម៉ោង
-                <span id="time-morning-display" class="font-bold"
-                  >៧:០០ ព្រឹក</span
-                >
-              </p>
-            </div>
-            <div
-              class="p-10 border border-amber-100 rounded-[3rem] bg-amber-50/30"
-            >
-              <i
-                data-lucide="utensils"
-                class="mx-auto mb-6 text-amber-700 w-12 h-12"
-              ></i>
-              <h4 class="font-moul text-xl mb-4 text-amber-800">
-                ពិសាភោជនាហារ
-              </h4>
-              <p class="text-gray-600 text-lg">
-                ម៉ោង
-                <span id="time-evening-display" class="font-bold"
-                  >៤:០០ រសៀល</span
-                >
-              </p>
-            </div>
-          </div>
-          <div
-            class="rounded-[2.5rem] overflow-hidden shadow-2xl h-80 md:h-[500px] mb-10 border-8 border-white"
-          >
-            <iframe
-              id="map-iframe-display"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3910.4567!2d105.5!3d11.3!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTHCsDE4JzAwLjAiTiAxMDXCsDMwJzAwLjAiRQ!5e0!3m2!1skm!2skh!4v1600000000000!5m2!1skm!2skh"
-              class="w-full h-full border-0"
-              loading="lazy"
-            ></iframe>
-          </div>
-        </div>
-      </section>
+      <!-- (Section removed as requested; info is already shown above) -->
 
       <!-- Thank You Message -->
       <footer class="hero-bg py-32 px-6 text-center border-t border-white/10">
@@ -366,6 +680,27 @@
             គឺជាកិត្តិយសដ៏ខ្ពង់ខ្ពស់សម្រាប់ក្រុមគ្រួសារយើងខ្ញុំ។ <br />
             សូមជូនពរឱ្យលោកអ្នកទទួលបាននូវសុភមង្គល និង សេចក្តីសុខគ្រប់ប្រការ។ "
           </p>
+          <div class="mt-12 flex justify-center gap-4">
+            <button
+              onclick="shareTo('telegram')"
+              class="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full transition-transform hover:scale-110 shadow-lg"
+            >
+              <i data-lucide="send" class="w-5 h-5"></i>
+            </button>
+            <button
+              onclick="shareTo('facebook')"
+              class="bg-blue-700 hover:bg-blue-800 text-white p-3 rounded-full transition-transform hover:scale-110 shadow-lg"
+            >
+              <i data-lucide="share-2" class="w-5 h-5"></i>
+            </button>
+            <button
+              onclick="shareTo('copy')"
+              class="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-full transition-transform hover:scale-110 shadow-lg"
+            >
+              <i data-lucide="link" class="w-5 h-5"></i>
+            </button>
+          </div>
+
           <div class="mt-20 opacity-30 text-xs tracking-[0.5em]">
             FEBRUARY 2030
           </div>
@@ -373,174 +708,31 @@
       </footer>
     </main>
 
-    <script>
-      lucide.createIcons();
+    <!-- Lightbox Modal -->
+    <div
+      id="lightbox-modal"
+      class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/90 p-4 opacity-0 transition-opacity duration-300"
+    >
+      <button
+        onclick="closeLightbox()"
+        class="absolute right-4 top-4 text-white hover:text-gray-300"
+      >
+        <i data-lucide="x" class="w-8 h-8"></i>
+      </button>
+      <img
+        id="lightbox-img"
+        src=""
+        alt="Enlarged view"
+        class="max-h-[90vh] max-w-[90vw] object-contain rounded-lg shadow-2xl scale-95 transition-transform duration-300"
+      />
+    </div>
 
-      let selectionType = "";
-      const audio = document.getElementById("bgMusic");
-      const musicBtn = document.getElementById("music-control");
-      audio.volume = 0.5;
+    <!-- Toast Notification Container -->
+    <div
+      id="toast"
+      class="pointer-events-none fixed bottom-4 right-4 z-50 flex w-[92vw] max-w-sm flex-col gap-2"
+    ></div>
 
-      function startMusic() {
-        audio
-          .play()
-          .then(() => {
-            musicBtn.style.display = "flex";
-            musicBtn.classList.add("music-playing");
-          })
-          .catch((e) => console.log("Waiting for user interaction..."));
-      }
-
-      function selectType(type) {
-        selectionType = type;
-        startMusic();
-        document.getElementById("type-selector").classList.add("hidden");
-        if (type === "couple") {
-          document.getElementById("input-fields").classList.remove("hidden");
-        } else {
-          document.getElementById("single-confirm").classList.remove("hidden");
-        }
-      }
-
-      function resetSelection() {
-        document.getElementById("type-selector").classList.remove("hidden");
-        document.getElementById("input-fields").classList.add("hidden");
-        document.getElementById("single-confirm").classList.add("hidden");
-      }
-
-      function showMainContent(finalName) {
-        document.getElementById("final-guest-name").innerText = finalName;
-        document
-          .getElementById("initial-overlay")
-          .classList.add("opacity-0", "pointer-events-none");
-
-        setTimeout(() => {
-          document.getElementById("initial-overlay").style.display = "none";
-          document.getElementById("main-content").classList.remove("hidden");
-          window.scrollTo(0, 0);
-        }, 800);
-      }
-
-      function toggleMusic() {
-        if (audio.paused) {
-          audio.play();
-          musicBtn.classList.add("music-playing");
-        } else {
-          audio.pause();
-          musicBtn.classList.remove("music-playing");
-        }
-      }
-    </script>
-    <script type="module">
-      import { db, doc, onSnapshot, collection, addDoc } from "./js/firebase-config.js";
-
-      // Global function to be called from the HTML module context
-      function alreadySubmitted(name) {
-        const cacheKey = "wedding-rsvp-submitted";
-        const existing = JSON.parse(localStorage.getItem(cacheKey) || "[]");
-        const normalized = name.toLowerCase().trim();
-        if (existing.includes(normalized)) {
-          return true;
-        }
-        existing.push(normalized);
-        localStorage.setItem(cacheKey, JSON.stringify(existing.slice(-20)));
-        return false;
-      }
-
-      window.generateCard = async function() {
-        let finalName = "";
-        let type = selectionType;
-        let guestData = { timestamp: new Date() };
-
-        const btnCouple = document.getElementById("btn-couple-submit");
-        const btnSingle = document.getElementById("btn-single-submit");
-        if(btnCouple) btnCouple.disabled = true;
-        if(btnSingle) btnSingle.disabled = true;
-
-        if (type === "couple") {
-          const n1 = document.getElementById("name1").value.trim();
-          const n2 = document.getElementById("name2").value.trim();
-          if (!n1 || !n2) {
-             if(btnCouple) btnCouple.disabled = false;
-             return alert("សូមបំពេញឈ្មោះទាំងពីរ!");
-          }
-          if (alreadySubmitted(n1.toLowerCase() + "|" + n2.toLowerCase())) {
-            if(btnCouple) btnCouple.disabled = false;
-            return alert("អ្នកបានបញ្ជាក់ការចូលរួមរួចហើយ!\nសូមមិនបញ្ជាក់ម្តងទៀត។");
-          }
-          finalName = n1 + " & " + n2;
-          guestData.type = "couple";
-          guestData.name1 = n1;
-          guestData.name2 = n2;
-          guestData.displayName = finalName;
-        } else {
-          const n = document.getElementById("single-name").value.trim();
-          if (!n) {
-             if(btnSingle) btnSingle.disabled = false;
-             return alert("សូមបញ្ចូលឈ្មោះរបស់អ្នក!");
-          }
-          if (alreadySubmitted(n)) {
-            if(btnSingle) btnSingle.disabled = false;
-            return alert("អ្នកបានបញ្ជាក់ការចូលរួមរួចហើយ!\nសូមមិនបញ្ជាក់ម្តងទៀត។");
-          }
-          finalName = n;
-          guestData.type = "single";
-          guestData.name1 = n;
-          guestData.displayName = finalName;
-        }
-
-        try {
-          // Save to Firebase
-          await addDoc(collection(db, "rsvps"), guestData);
-          showMainContent(finalName);
-        } catch (error) {
-          console.error("Error adding RSVP: ", error);
-          alert("មានបញ្ហាក្នុងការរក្សាទុក។ សូមព្យាយាមម្តងទៀត!");
-          if(btnCouple) btnCouple.disabled = false;
-          if(btnSingle) btnSingle.disabled = false;
-        }
-      };
-
-      // Add click listeners to buttons to avoid inline onclick with modules
-      document.getElementById("btn-couple-submit").addEventListener("click", window.generateCard);
-      document.getElementById("btn-single-submit").addEventListener("click", window.generateCard);
-
-      const docRef = doc(db, "wedding", "details");
-
-      onSnapshot(docRef, (docSnap) => {
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-
-          if (data.groomName)
-            document.getElementById("groom-name-display").innerText =
-              data.groomName;
-          if (data.brideName)
-            document.getElementById("bride-name-display").innerText =
-              data.brideName;
-          if (data.eventDate)
-            document.getElementById("event-date-display").innerText =
-              data.eventDate;
-          if (data.location)
-            document.getElementById("location-display").innerText =
-              data.location;
-          if (data.timeMorning)
-            document.getElementById("time-morning-display").innerText =
-              data.timeMorning;
-          if (data.timeEvening)
-            document.getElementById("time-evening-display").innerText =
-              data.timeEvening;
-
-          if (data.mapUrl) {
-            const iframe = document.getElementById("map-iframe-display");
-            if (iframe.src !== data.mapUrl) {
-              iframe.src = data.mapUrl;
-            }
-            iframe.parentElement.classList.remove("hidden");
-          } else {
-            document.getElementById("map-iframe-display").parentElement.classList.add("hidden");
-          }
-        }
-      });
-    </script>
+    <script type="module" src="js/main.js"></script>
   </body>
 </html>

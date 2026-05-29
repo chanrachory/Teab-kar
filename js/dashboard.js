@@ -13,7 +13,8 @@ import {
   onSnapshot,
   deleteDoc,
   updateDoc,
-} from "./firebase-config.js";
+  addDoc
+} from "../firebase/firebase-config.js";
 
 const docRef = doc(db, "wedding", "details");
 const rsvpRef = collection(db, "rsvps");
@@ -25,6 +26,7 @@ const rowsPerPage = 7;
 let dailyChart;
 let typeChart;
 let unsubscribeRsvps = null;
+let html5QrcodeScanner = null;
 
 const elements = {
   loginSection: document.getElementById("login-section"),
@@ -42,6 +44,7 @@ const elements = {
   statCouple: document.getElementById("stat-couple"),
   statSingle: document.getElementById("stat-single"),
   statToday: document.getElementById("stat-today"),
+  statTables: document.getElementById("stat-tables"),
   loading: document.getElementById("loading"),
   successMsg: document.getElementById("success-msg"),
   errorMsg: document.getElementById("error-msg"),
@@ -53,9 +56,124 @@ const elements = {
   editName: document.getElementById("edit-name"),
   editType: document.getElementById("edit-type"),
   dashboardForm: document.getElementById("dashboard-form"),
+  elements.btnScanQr: document.getElementById("btn-scan-qr"),
+  scannerModal: document.getElementById("scanner-modal"),
+  closeScannerModal: document.getElementById("close-scanner-modal"),
+  scannerResult: document.getElementById("scanner-result"),
+  btnExportCsv: document.getElementById("btn-export-csv"),
+  btnExportPdf: document.getElementById("btn-export-pdf"),
+  eventsContainer: document.getElementById("events-container"),
+  btnAddEvent: document.getElementById("btn-add-event"),
+  eventModal: document.getElementById("event-modal"),
+  closeEventModal: document.getElementById("close-event-modal"),
+  eventForm: document.getElementById("event-form"),
+  eventId: document.getElementById("event-id"),
+  eventTitle: document.getElementById("event-title"),
+  eventTime: document.getElementById("event-time"),
+  eventDesc: document.getElementById("event-desc"),
+  eventIcon: document.getElementById("event-icon"),
+  eventModalTitle: document.getElementById("event-modal-title"),
 };
 
-function showToast(message, tone = "info") {
+  function showToast(message, tone = "info") {
+  // ...
+  // ... skipping to renderCharts to update it ...
+  function renderCharts(list) {
+  const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const data = Array(7).fill(0);
+  list.forEach((entry) => {
+    const date = entry.timestamp?.toDate ? entry.timestamp.toDate() : new Date(entry.timestamp || Date.now());
+    const day = date.getDay();
+    data[(day + 6) % 7] += 1;
+  });
+
+  if (dailyChart) dailyChart.destroy();
+  dailyChart = new Chart(document.getElementById("dailyChart"), {
+    type: "bar",
+    data: { labels, datasets: [{ label: "Daily RSVPs", data, backgroundColor: "rgba(245, 158, 11, 0.7)", borderColor: "#f59e0b", borderWidth: 1 }] },
+    options: { responsive: true, plugins: { legend: { display: false } } },
+  });
+
+  const attendingCount = list.filter(item => item.status !== "declined" && !item.checkedIn).length;
+  const checkedInCount = list.filter(item => item.checkedIn).length;
+  const declinedCount = list.filter(item => item.status === "declined").length;
+
+  if (typeChart) typeChart.destroy();
+  typeChart = new Chart(document.getElementById("typeChart"), {
+    type: "doughnut",
+    data: {
+      labels: ["Pending Check-In", "Checked In", "Declined"],
+      datasets: [{ data: [attendingCount, checkedInCount, declinedCount], backgroundColor: ["#3b82f6", "#10b981", "#ef4444"] }],
+    },
+    options: { responsive: true },
+  });
+  }
+  // ... skipping to export functions ...
+  function exportToCSV() {
+  const headers = ["Guest Name", "Type", "Status", "Checked In", "RSVP Date"];
+  const rows = filteredRsvps.map(item => [
+    `"${item.displayName || ''}"`,
+    item.type === 'couple' ? 'Couple' : 'Single',
+    item.status === 'declined' ? 'Declined' : 'Attending',
+    item.checkedIn ? 'Yes' : 'No',
+    `"${formatDate(item.timestamp)}"`
+  ]);
+
+  const csvContent = "data:text/csv;charset=utf-8,\uFEFF" 
+    + headers.join(",") + "\n" 
+    + rows.map(e => e.join(",")).join("\n");
+
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", `guest_list_${new Date().toISOString().slice(0,10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  showToast("CSV Exported successfully", "success");
+  }
+
+  function exportToPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Wedding Guest List", 14, 20);
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Total Guests: ${filteredRsvps.length}`, 14, 28);
+  doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 34);
+
+  const tableColumn = ["Name", "Type", "Status", "Arrived", "Date"];
+  const tableRows = [];
+
+  filteredRsvps.forEach(item => {
+    const rowData = [
+      item.displayName || "",
+      item.type === 'couple' ? 'Couple' : 'Single',
+      item.status === 'declined' ? 'Declined' : 'Attending',
+      item.checkedIn ? 'Yes' : 'No',
+      formatDate(item.timestamp)
+    ];
+    tableRows.push(rowData);
+  });
+
+  doc.autoTable({
+    head: [tableColumn],
+    body: tableRows,
+    startY: 40,
+    theme: 'grid',
+    styles: { fontSize: 9 },
+    headStyles: { fillColor: [245, 158, 11] } // amber-500
+  });
+
+  doc.save(`guest_list_${new Date().toISOString().slice(0,10)}.pdf`);
+  showToast("PDF Exported successfully", "success");
+  }
+  // ... in attachEvents ...
+  elements.btnExportCsv.addEventListener("click", exportToCSV);
+  elements.btnExportPdf.addEventListener("click", exportToPDF);
+
   const colors = {
     info: "bg-slate-800 text-white",
     success: "bg-emerald-600 text-white",
@@ -90,15 +208,26 @@ function isToday(value) {
   return date.toDateString() === today.toDateString();
 }
 
-function countByType(list, type) {
-  return list.filter((item) => item.type === type).length;
+function countByType(list, type, status) {
+  return list.filter((item) => item.type === type && item.status === status).length;
 }
 
 function renderStats(list) {
-  elements.statTotal.textContent = list.length;
-  elements.statCouple.textContent = countByType(list, "couple");
-  elements.statSingle.textContent = countByType(list, "single");
+  const attending = list.filter(item => item.status !== "declined");
+  
+  // Calculate total head count: singles = 1, couples = 2
+  let totalHeadCount = 0;
+  attending.forEach(item => {
+    totalHeadCount += item.type === 'couple' ? 2 : 1;
+  });
+
+  elements.statTotal.textContent = totalHeadCount;
+  elements.statCouple.textContent = countByType(list, "couple", "attending");
+  elements.statSingle.textContent = countByType(list, "single", "attending");
   elements.statToday.textContent = list.filter((item) => isToday(item.timestamp)).length;
+  
+  // Table estimation (assuming 10 people per table)
+  elements.statTables.textContent = Math.ceil(totalHeadCount / 10);
 }
 
 function renderCharts(list) {
@@ -121,8 +250,8 @@ function renderCharts(list) {
   typeChart = new Chart(document.getElementById("typeChart"), {
     type: "doughnut",
     data: {
-      labels: ["Couple", "Single"],
-      datasets: [{ data: [countByType(list, "couple"), countByType(list, "single")], backgroundColor: ["#f59e0b", "#3b82f6"] }],
+      labels: ["Couple", "Single", "Declined"],
+      datasets: [{ data: [countByType(list, "couple", "attending"), countByType(list, "single", "attending"), list.filter(item => item.status === "declined").length], backgroundColor: ["#f59e0b", "#3b82f6", "#ef4444"] }],
     },
     options: { responsive: true },
   });
@@ -150,14 +279,26 @@ function renderTable(list) {
     return;
   }
 
-  elements.guestTableBody.innerHTML = pageItems.map((item) => `
+  elements.guestTableBody.innerHTML = pageItems.map((item) => {
+    let statusBadge = '';
+    if (item.status === 'declined') {
+      statusBadge = '<span class="rounded-full px-2.5 py-1 text-xs bg-red-100 text-red-800 dark:bg-red-500/10 dark:text-red-100 ml-2">Declined</span>';
+    } else {
+      statusBadge = '<span class="rounded-full px-2.5 py-1 text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-100 ml-2">Attending</span>';
+    }
+    
+    let checkInBadge = item.checkedIn ? '<span class="rounded-full px-2.5 py-1 text-xs bg-indigo-100 text-indigo-800 dark:bg-indigo-500/20 dark:text-indigo-200 ml-2 border border-indigo-200 dark:border-indigo-500/30"><i data-lucide="check" class="w-3 h-3 inline"></i> Arrived</span>' : '';
+    
+    return `
     <tr>
-      <td class="px-4 py-3"><div class="font-semibold text-slate-800 dark:text-slate-100">${item.displayName || "Guest"}</div><div class="text-xs text-slate-500 dark:text-slate-300">${item.name2 ? `${item.name1} & ${item.name2}` : item.name1 || ""}</div></td>
+      <td class="px-4 py-3"><div class="font-semibold text-slate-800 dark:text-slate-100 flex items-center">${item.displayName || "Guest"} ${statusBadge} ${checkInBadge}</div><div class="text-xs text-slate-500 dark:text-slate-300 mt-1">${item.name2 ? `${item.name1} & ${item.name2}` : item.name1 || ""}</div></td>
       <td class="px-4 py-3"><span class="rounded-full px-2.5 py-1 text-xs ${item.type === "couple" ? "bg-amber-100 text-amber-800 dark:bg-amber-500/10 dark:text-amber-100" : "bg-blue-100 text-blue-800 dark:bg-blue-500/10 dark:text-blue-100"}">${item.type === "couple" ? "Couple" : "Single"}</span></td>
       <td class="px-4 py-3 text-slate-500 dark:text-slate-300">${formatDate(item.timestamp)}</td>
-      <td class="px-4 py-3 text-right"><button data-action="edit" data-id="${item.id}" class="mr-2 rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">Edit</button><button data-action="delete" data-id="${item.id}" class="rounded-xl border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-200 dark:hover:bg-red-500/10">Delete</button></td>
+      <td class="px-4 py-3 text-right"><button data-action="checkin" data-id="${item.id}" class="mr-2 rounded-xl border border-indigo-200 px-3 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 dark:border-indigo-500/30 dark:text-indigo-300 dark:hover:bg-indigo-500/10 ${item.checkedIn || item.status === 'declined' ? 'opacity-50 cursor-not-allowed' : ''}" ${item.checkedIn || item.status === 'declined' ? 'disabled' : ''}>Check In</button><button data-action="edit" data-id="${item.id}" class="mr-2 rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">Edit</button><button data-action="delete" data-id="${item.id}" class="rounded-xl border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-200 dark:hover:bg-red-500/10">Delete</button></td>
     </tr>
-  `).join("");
+  `}).join("");
+
+  lucide.createIcons();
 
   const buttons = [];
   for (let i = 1; i <= totalPages; i += 1) {
@@ -196,6 +337,61 @@ function listenToRsvps() {
     allRsvps = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
     render();
   });
+}
+
+function startQrScanner() {
+  elements.scannerModal.classList.remove("hidden");
+  elements.scannerModal.classList.add("flex");
+  
+  if (!html5QrcodeScanner) {
+    html5QrcodeScanner = new Html5QrcodeScanner(
+      "qr-reader",
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      false
+    );
+  }
+  
+  elements.scannerResult.classList.add("hidden");
+  elements.scannerResult.textContent = "";
+  
+  html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+}
+
+async function onScanSuccess(decodedText, decodedResult) {
+  // decodedText should be the RSVP document ID
+  html5QrcodeScanner.clear();
+  
+  const guest = allRsvps.find(r => r.id === decodedText);
+  elements.scannerResult.classList.remove("hidden");
+  
+  if (guest) {
+    if (guest.checkedIn) {
+      elements.scannerResult.innerHTML = `<i data-lucide="info" class="w-6 h-6 mx-auto mb-2 text-amber-500"></i><p class="text-amber-600">Guest <strong>${guest.displayName}</strong> is already checked in!</p>`;
+    } else {
+      try {
+        await updateDoc(doc(db, "rsvps", decodedText), { checkedIn: true, checkInTime: new Date() });
+        elements.scannerResult.innerHTML = `<i data-lucide="check-circle" class="w-6 h-6 mx-auto mb-2 text-emerald-500"></i><p class="text-emerald-600">Successfully checked in <strong>${guest.displayName}</strong>!</p>`;
+        showToast(`Checked in ${guest.displayName}`, "success");
+      } catch (err) {
+        elements.scannerResult.innerHTML = `<p class="text-red-600">Failed to check in. Error occurred.</p>`;
+      }
+    }
+  } else {
+    elements.scannerResult.innerHTML = `<i data-lucide="x-circle" class="w-6 h-6 mx-auto mb-2 text-red-500"></i><p class="text-red-600">Invalid QR Code. Guest not found.</p>`;
+  }
+  lucide.createIcons();
+}
+
+function onScanFailure(error) {
+  // handle scan failure, usually better to ignore and keep scanning
+}
+
+function stopQrScanner() {
+  if (html5QrcodeScanner) {
+    html5QrcodeScanner.clear();
+  }
+  elements.scannerModal.classList.add("hidden");
+  elements.scannerModal.classList.remove("flex");
 }
 
 function attachEvents() {
@@ -247,6 +443,16 @@ function attachEvents() {
         showToast("RSVP deleted successfully", "success");
       } catch (error) {
         showToast("Unable to delete RSVP", "error");
+      }
+      return;
+    }
+    
+    if (action === "checkin") {
+      try {
+        await updateDoc(doc(db, "rsvps", id), { checkedIn: true, checkInTime: new Date() });
+        showToast("Guest checked in manually", "success");
+      } catch (error) {
+        showToast("Unable to check in", "error");
       }
       return;
     }
@@ -306,6 +512,12 @@ function attachEvents() {
       elements.errorMsg.classList.remove("hidden");
       showToast("Unable to save details", "error");
     }
+  });
+  
+  elements.btnScanQr.addEventListener("click", startQrScanner);
+  elements.closeScannerModal.addEventListener("click", stopQrScanner);
+  elements.scannerModal.addEventListener("click", (event) => {
+    if (event.target === elements.scannerModal) stopQrScanner();
   });
 }
 

@@ -1,278 +1,731 @@
 <!doctype html>
 <html lang="km">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard គ្រប់គ្រងព័ត៌មាន</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Moul&family=Kantumruy+Pro:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script
+      src="https://unpkg.com/html5-qrcode"
+      type="text/javascript"
+    ></script>
+    <style>
+      body {
+        font-family: "Kantumruy Pro", sans-serif;
+        background: #f3f4f6;
+      }
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard គ្រប់គ្រងព័ត៌មាន</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Moul&family=Kantumruy+Pro:wght@300;400;700&display=swap"
-    rel="stylesheet" />
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    body {
-      font-family: "Kantumruy Pro", sans-serif;
-      background: #f3f4f6;
-    }
+      .font-moul {
+        font-family: "Moul", serif;
+      }
+    </style>
+  </head>
 
-    .font-moul {
-      font-family: "Moul", serif;
-    }
-  </style>
-</head>
-
-<body
-  class="min-h-screen bg-slate-100 text-slate-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300">
-  <div id="login-section" class="min-h-screen flex items-center justify-center p-4 sm:p-6">
+  <body
+    class="min-h-screen bg-slate-100 text-slate-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300"
+  >
     <div
-      class="w-full max-w-md rounded-3xl border border-white/40 bg-white/80 p-8 shadow-2xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90">
-      <div class="mb-6 text-center">
-        <p class="text-sm uppercase tracking-[0.35em] text-amber-500">Wedding Dashboard</p>
-        <h1 class="mt-2 font-moul text-2xl text-amber-600">ចូលគណនី</h1>
-        <p class="mt-2 text-sm text-slate-500 dark:text-slate-300">Protected admin access for RSVP management and
-          analytics.</p>
-      </div>
-      <form id="login-form" class="space-y-4">
-        <div>
-          <label class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">អ៊ីមែល (Email)</label>
-          <input id="email" type="email" required
-            class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-700 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
+      id="login-section"
+      class="min-h-screen flex items-center justify-center p-4 sm:p-6"
+    >
+      <div
+        class="w-full max-w-md rounded-3xl border border-white/40 bg-white/80 p-8 shadow-2xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90"
+      >
+        <div class="mb-6 text-center">
+          <p class="text-sm uppercase tracking-[0.35em] text-amber-500">
+            Wedding Dashboard
+          </p>
+          <h1 class="mt-2 font-moul text-2xl text-amber-600">ចូលគណនី</h1>
+          <p class="mt-2 text-sm text-slate-500 dark:text-slate-300">
+            Protected admin access for RSVP management and analytics.
+          </p>
         </div>
-        <div>
-          <label class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">ពាក្យសម្ងាត់
-            (Password)</label>
-          <input id="password" type="password" required
-            class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-700 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
-        </div>
-        <div id="login-error"
-          class="hidden rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-500/10 dark:text-red-200">អ៊ីមែល
-          ឬលេខសម្ងាត់មិនត្រឹមត្រូវ!</div>
-        <button type="submit"
-          class="w-full rounded-2xl bg-amber-500 px-4 py-3 font-semibold text-white shadow-lg shadow-amber-500/20 transition hover:bg-amber-600">ចូល
-          (Login)</button>
-      </form>
-    </div>
-  </div>
-
-  <div id="dashboard-section" class="hidden min-h-screen lg:flex">
-    <aside
-      class="hidden w-72 flex-col border-r border-slate-200 bg-white/90 p-6 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90 lg:flex">
-      <div>
-        <p class="text-xs uppercase tracking-[0.35em] text-amber-500">BacII</p>
-        <h2 class="mt-2 font-moul text-xl text-amber-600">Wedding Management</h2>
-        <p class="mt-2 text-sm text-slate-500 dark:text-slate-300">Modern RSVP dashboard with analytics and guest
-          operations.</p>
-      </div>
-      <nav class="mt-8 space-y-2 text-sm">
-        <a href="index.html"
-          class="flex items-center gap-3 rounded-2xl bg-amber-50 px-4 py-3 text-amber-700 dark:bg-amber-500/10 dark:text-amber-200"><i
-            data-lucide="home" class="h-4 w-4"></i> Invitation page</a>
-        <button id="dark-mode-toggle"
-          class="flex w-full items-center gap-3 rounded-2xl border border-slate-200 px-4 py-3 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800"><i
-            data-lucide="moon" class="h-4 w-4"></i> Dark mode</button>
-        <button id="logout-btn"
-          class="flex w-full items-center gap-3 rounded-2xl border border-red-200 px-4 py-3 text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-200 dark:hover:bg-red-500/10"><i
-            data-lucide="log-out" class="h-4 w-4"></i> Logout</button>
-      </nav>
-    </aside>
-
-    <main class="flex-1 p-4 sm:p-6 lg:p-8">
-      <header
-        class="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90">
-        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <form id="login-form" class="space-y-4">
           <div>
-            <p class="text-xs uppercase tracking-[0.35em] text-amber-500">Admin overview</p>
-            <h1 class="mt-2 font-moul text-2xl text-amber-600">គ្រប់គ្រងព័ត៌មានធៀបការ</h1>
-            <p class="mt-1 text-sm text-slate-500 dark:text-slate-300">Track guests, RSVPs, and live wedding activity in
-              one place.</p>
+            <label
+              class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200"
+              >អ៊ីមែល (Email)</label
+            >
+            <input
+              id="email"
+              type="email"
+              required
+              class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-700 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+            />
           </div>
-          <div class="flex items-center gap-3">
-            <button id="mobile-dark-mode"
-              class="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 lg:hidden">Dark
-              mode</button>
-            <a href="index.html"
-              class="rounded-2xl bg-amber-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-amber-500/20 hover:bg-amber-600">Open
-              invitation</a>
+          <div>
+            <label
+              class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200"
+              >ពាក្យសម្ងាត់ (Password)</label
+            >
+            <input
+              id="password"
+              type="password"
+              required
+              class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-700 outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+            />
           </div>
-        </div>
-      </header>
-
-      <section class="mt-6 grid gap-6 xl:grid-cols-4 md:grid-cols-2">
-        <article
-          class="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-slate-500 dark:text-slate-300">Total Guests</p>
-              <h3 id="stat-total" class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">0</h3>
-            </div><i data-lucide="users" class="h-8 w-8 text-amber-500"></i>
-          </div>
-        </article>
-        <article
-          class="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-slate-500 dark:text-slate-300">Couple Guests</p>
-              <h3 id="stat-couple" class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">0</h3>
-            </div><i data-lucide="heart-handshake" class="h-8 w-8 text-pink-500"></i>
-          </div>
-        </article>
-        <article
-          class="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-slate-500 dark:text-slate-300">Single Guests</p>
-              <h3 id="stat-single" class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">0</h3>
-            </div><i data-lucide="user" class="h-8 w-8 text-blue-500"></i>
-          </div>
-        </article>
-        <article
-          class="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-slate-500 dark:text-slate-300">RSVPs Today</p>
-              <h3 id="stat-today" class="mt-2 text-3xl font-bold text-slate-900 dark:text-white">0</h3>
-            </div><i data-lucide="calendar-days" class="h-8 w-8 text-emerald-500"></i>
-          </div>
-        </article>
-      </section>
-
-      <section class="mt-6 grid gap-6 2xl:grid-cols-[1.2fr_0.8fr]">
-        <article
-          class="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90">
-          <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p class="text-xs uppercase tracking-[0.35em] text-amber-500">Guest management</p>
-              <h2 class="mt-2 text-xl font-semibold text-slate-900 dark:text-white">Live RSVP list</h2>
-            </div>
-            <div class="flex flex-wrap gap-3">
-              <input id="guest-search" type="search" placeholder="Search guest name"
-                class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-700 outline-none focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
-              <select id="guest-filter"
-                class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-700 outline-none focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
-                <option value="all">All guests</option>
-                <option value="couple">Couple</option>
-                <option value="single">Single</option>
-              </select>
-            </div>
-          </div>
-          <div class="mt-4 overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800">
-            <table class="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800">
-              <thead class="bg-slate-50 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                <tr>
-                  <th class="px-4 py-3 text-left">Guest</th>
-                  <th class="px-4 py-3 text-left">Type</th>
-                  <th class="px-4 py-3 text-left">Time</th>
-                  <th class="px-4 py-3 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody id="guest-table-body"
-                class="divide-y divide-slate-100 bg-white dark:divide-slate-800 dark:bg-slate-900"></tbody>
-            </table>
-          </div>
-          <div id="pagination" class="mt-4 flex flex-wrap items-center justify-end gap-2"></div>
-        </article>
-
-        <article
-          class="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90">
-          <p class="text-xs uppercase tracking-[0.35em] text-amber-500">Analytics</p>
-          <h2 class="mt-2 text-xl font-semibold text-slate-900 dark:text-white">RSVP charts</h2>
           <div
-            class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/70">
-            <canvas id="dailyChart" height="180"></canvas></div>
-          <div
-            class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/70">
-            <canvas id="typeChart" height="180"></canvas></div>
-        </article>
-      </section>
-
-      <section class="mt-6 grid gap-6 lg:grid-cols-[1fr_0.8fr]">
-        <article
-          class="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90">
-          <p class="text-xs uppercase tracking-[0.35em] text-amber-500">Wedding details</p>
-          <h2 class="mt-2 text-xl font-semibold text-slate-900 dark:text-white">Editor</h2>
-          <form id="dashboard-form" class="mt-4 space-y-4">
-            <div class="grid gap-4 md:grid-cols-2">
-              <div><label class="mb-2 block text-sm font-semibold">ឈ្មោះកូនកំលោះ</label><input id="groomName"
-                  type="text"
-                  class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
-              </div>
-              <div><label class="mb-2 block text-sm font-semibold">ឈ្មោះកូនក្រមុំ</label><input id="brideName"
-                  type="text"
-                  class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
-              </div>
-            </div>
-            <div><label class="mb-2 block text-sm font-semibold">កាលបរិច្ឆេទ</label><input id="eventDate" type="text"
-                class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
-            </div>
-            <div><label class="mb-2 block text-sm font-semibold">ទីតាំង</label><input id="location" type="text"
-                class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
-            </div>
-            <div class="grid gap-4 md:grid-cols-2">
-              <div><label class="mb-2 block text-sm font-semibold">ម៉ោងហែកូនកំលោះ</label><input id="timeMorning"
-                  type="text"
-                  class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
-              </div>
-              <div><label class="mb-2 block text-sm font-semibold">ម៉ោងពិសាភោជនាហារ</label><input id="timeEvening"
-                  type="text"
-                  class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
-              </div>
-            </div>
-            <div><label class="mb-2 block text-sm font-semibold">តំណភ្ជាប់ផែនទី</label><input id="mapUrl" type="url"
-                class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
-            </div>
-            <button type="submit"
-              class="w-full rounded-2xl bg-amber-500 px-4 py-3 font-semibold text-white shadow-lg shadow-amber-500/20 transition hover:bg-amber-600">រក្សាទុកព័ត៌មាន</button>
-            <div id="loading"
-              class="hidden rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:bg-amber-500/10 dark:text-amber-100">
-              កំពុងដំណើរការ...</div>
-            <div id="success-msg"
-              class="hidden rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-100">
-              រក្សាទុកបានជោគជ័យ!</div>
-            <div id="error-msg"
-              class="hidden rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-500/10 dark:text-red-100">
-              មានបញ្ហា! សូមពិនិត្យ Firebase Config ឬ Rules។</div>
-          </form>
-        </article>
-        <article
-          class="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90">
-          <p class="text-xs uppercase tracking-[0.35em] text-amber-500">Production notes</p>
-          <h2 class="mt-2 text-xl font-semibold text-slate-900 dark:text-white">Upgrade roadmap</h2>
-          <ul class="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300">
-            <li>• Duplicate RSVP prevention and validation are now handled in the invitation flow.</li>
-            <li>• Firestore rules should be deployed for admin-only writes and public RSVP creation.</li>
-            <li>• Chart.js, pagination, and dark mode make the dashboard ready for a final-year presentation.</li>
-          </ul>
-        </article>
-      </section>
-    </main>
-  </div>
-
-  <div id="toast" class="pointer-events-none fixed bottom-4 right-4 z-50 flex w-[92vw] max-w-sm flex-col gap-2"></div>
-  <div id="edit-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 p-4">
-    <div
-      class="w-full max-w-md rounded-3xl border border-white/60 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
-      <div class="flex items-center justify-between">
-        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Edit RSVP</h3><button id="close-edit-modal"
-          class="text-slate-500 dark:text-slate-300">✕</button>
+            id="login-error"
+            class="hidden rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-500/10 dark:text-red-200"
+          >
+            អ៊ីមែល ឬលេខសម្ងាត់មិនត្រឹមត្រូវ!
+          </div>
+          <button
+            type="submit"
+            class="w-full rounded-2xl bg-amber-500 px-4 py-3 font-semibold text-white shadow-lg shadow-amber-500/20 transition hover:bg-amber-600"
+          >
+            ចូល (Login)
+          </button>
+        </form>
       </div>
-      <form id="edit-form" class="mt-4 space-y-3">
-        <input id="edit-id" type="hidden" />
-        <input id="edit-name" type="text"
-          class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" />
-        <select id="edit-type"
-          class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
-          <option value="single">Single</option>
-          <option value="couple">Couple</option>
-        </select>
-        <button type="submit"
-          class="w-full rounded-2xl bg-amber-500 px-4 py-3 font-semibold text-white hover:bg-amber-600">Save
-          changes</button>
-      </form>
     </div>
-  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script type="module" src="./js/dashboard.js"></script>
-</body>
+    <div id="dashboard-section" class="hidden min-h-screen lg:flex">
+      <aside
+        class="hidden w-72 flex-col border-r border-slate-200 bg-white/90 p-6 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90 lg:flex"
+      >
+        <div>
+          <p class="text-xs uppercase tracking-[0.35em] text-amber-500">
+            BacII
+          </p>
+          <h2 class="mt-2 font-moul text-xl text-amber-600">
+            Wedding Management
+          </h2>
+          <p class="mt-2 text-sm text-slate-500 dark:text-slate-300">
+            Modern RSVP dashboard with analytics and guest operations.
+          </p>
+        </div>
+        <nav class="mt-8 space-y-2 text-sm">
+          <a
+            href="index.html"
+            class="flex items-center gap-3 rounded-2xl bg-amber-50 px-4 py-3 text-amber-700 dark:bg-amber-500/10 dark:text-amber-200"
+            ><i data-lucide="home" class="h-4 w-4"></i> Invitation page</a
+          >
+          <button
+            id="dark-mode-toggle"
+            class="flex w-full items-center gap-3 rounded-2xl border border-slate-200 px-4 py-3 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800"
+          >
+            <i data-lucide="moon" class="h-4 w-4"></i> Dark mode
+          </button>
+          <button
+            id="logout-btn"
+            class="flex w-full items-center gap-3 rounded-2xl border border-red-200 px-4 py-3 text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-200 dark:hover:bg-red-500/10"
+          >
+            <i data-lucide="log-out" class="h-4 w-4"></i> Logout
+          </button>
+        </nav>
+      </aside>
 
+      <main class="flex-1 p-4 sm:p-6 lg:p-8">
+        <header
+          class="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90"
+        >
+          <div
+            class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
+          >
+            <div>
+              <p class="text-xs uppercase tracking-[0.35em] text-amber-500">
+                Admin overview
+              </p>
+              <h1 class="mt-2 font-moul text-2xl text-amber-600">
+                គ្រប់គ្រងព័ត៌មានធៀបការ
+              </h1>
+              <p class="mt-1 text-sm text-slate-500 dark:text-slate-300">
+                Track guests, RSVPs, and live wedding activity in one place.
+              </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+              <button
+                id="mobile-dark-mode"
+                class="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 lg:hidden"
+              >
+                Dark mode
+              </button>
+              <button
+                id="btn-export-excel"
+                class="rounded-2xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 flex items-center gap-2"
+              >
+                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Export
+                Excel
+              </button>
+              <button
+                id="btn-export-pdf"
+                class="rounded-2xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-rose-600/20 hover:bg-rose-700 flex items-center gap-2"
+              >
+                <i data-lucide="file-text" class="w-4 h-4"></i> Export PDF
+              </button>
+              <button
+                id="btn-scan-qr"
+                class="rounded-2xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 flex items-center gap-2"
+              >
+                <i data-lucide="scan-line" class="w-4 h-4"></i> Scan QR Check-In
+              </button>
+              <a
+                href="index.html"
+                class="rounded-2xl bg-amber-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-amber-500/20 hover:bg-amber-600"
+                >Open invitation</a
+              >
+            </div>
+          </div>
+        </header>
+
+        <section
+          class="mt-6 grid gap-6 xl:grid-cols-5 md:grid-cols-3 sm:grid-cols-2"
+        >
+          <article
+            class="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-slate-500 dark:text-slate-300">
+                  Total Guests
+                </p>
+                <h3
+                  id="stat-total"
+                  class="mt-2 text-3xl font-bold text-slate-900 dark:text-white"
+                >
+                  0
+                </h3>
+              </div>
+              <i data-lucide="users" class="h-8 w-8 text-amber-500"></i>
+            </div>
+          </article>
+          <article
+            class="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-slate-500 dark:text-slate-300">
+                  Couple Guests
+                </p>
+                <h3
+                  id="stat-couple"
+                  class="mt-2 text-3xl font-bold text-slate-900 dark:text-white"
+                >
+                  0
+                </h3>
+              </div>
+              <i
+                data-lucide="heart-handshake"
+                class="h-8 w-8 text-pink-500"
+              ></i>
+            </div>
+          </article>
+          <article
+            class="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-slate-500 dark:text-slate-300">
+                  Single Guests
+                </p>
+                <h3
+                  id="stat-single"
+                  class="mt-2 text-3xl font-bold text-slate-900 dark:text-white"
+                >
+                  0
+                </h3>
+              </div>
+              <i data-lucide="user" class="h-8 w-8 text-blue-500"></i>
+            </div>
+          </article>
+          <article
+            class="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-slate-500 dark:text-slate-300">
+                  RSVPs Today
+                </p>
+                <h3
+                  id="stat-today"
+                  class="mt-2 text-3xl font-bold text-slate-900 dark:text-white"
+                >
+                  0
+                </h3>
+              </div>
+              <i
+                data-lucide="calendar-days"
+                class="h-8 w-8 text-emerald-500"
+              ></i>
+            </div>
+          </article>
+          <article
+            class="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90"
+          >
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-slate-500 dark:text-slate-300">
+                  Est. Tables
+                </p>
+                <h3
+                  id="stat-tables"
+                  class="mt-2 text-3xl font-bold text-slate-900 dark:text-white"
+                >
+                  0
+                </h3>
+              </div>
+              <i data-lucide="utensils" class="h-8 w-8 text-indigo-500"></i>
+            </div>
+          </article>
+        </section>
+
+        <section class="mt-6 grid gap-6 2xl:grid-cols-[1.2fr_0.8fr]">
+          <article
+            class="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90"
+          >
+            <div
+              class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between"
+            >
+              <div>
+                <p class="text-xs uppercase tracking-[0.35em] text-amber-500">
+                  Guest management
+                </p>
+                <h2
+                  class="mt-2 text-xl font-semibold text-slate-900 dark:text-white"
+                >
+                  Live RSVP list
+                </h2>
+              </div>
+              <div class="flex flex-wrap gap-3">
+                <input
+                  id="guest-search"
+                  type="search"
+                  placeholder="Search guest name"
+                  class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-700 outline-none focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                />
+                <select
+                  id="guest-filter"
+                  class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm text-slate-700 outline-none focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                >
+                  <option value="all">All guests</option>
+                  <option value="couple">Couple</option>
+                  <option value="single">Single</option>
+                </select>
+              </div>
+            </div>
+            <div
+              class="mt-4 overflow-x-auto rounded-2xl border border-slate-200 dark:border-slate-800"
+            >
+              <table
+                class="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-800"
+              >
+                <thead
+                  class="bg-slate-50 text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                >
+                  <tr>
+                    <th class="px-4 py-3 text-left">Guest</th>
+                    <th class="px-4 py-3 text-left">Type</th>
+                    <th class="px-4 py-3 text-left">Time</th>
+                    <th class="px-4 py-3 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody
+                  id="guest-table-body"
+                  class="divide-y divide-slate-100 bg-white dark:divide-slate-800 dark:bg-slate-900"
+                ></tbody>
+              </table>
+            </div>
+            <div
+              id="pagination"
+              class="mt-4 flex flex-wrap items-center justify-end gap-2"
+            ></div>
+          </article>
+
+          <article
+            class="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90"
+          >
+            <p class="text-xs uppercase tracking-[0.35em] text-amber-500">
+              Analytics
+            </p>
+            <h2
+              class="mt-2 text-xl font-semibold text-slate-900 dark:text-white"
+            >
+              RSVP charts
+            </h2>
+            <div
+              class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/70"
+            >
+              <canvas id="dailyChart" height="180"></canvas>
+            </div>
+            <div
+              class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/70"
+            >
+              <canvas id="typeChart" height="180"></canvas>
+            </div>
+          </article>
+        </section>
+
+        <section class="mt-6 grid gap-6 lg:grid-cols-[1fr_0.8fr]">
+          <!-- Timeline Events Management -->
+          <article
+            class="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90 lg:col-span-2"
+          >
+            <div
+              class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between"
+            >
+              <div>
+                <p class="text-xs uppercase tracking-[0.35em] text-amber-500">
+                  Timeline Management
+                </p>
+                <h2
+                  class="mt-2 text-xl font-semibold text-slate-900 dark:text-white"
+                >
+                  កម្មវិធីតាមប្រពៃណី
+                </h2>
+              </div>
+              <button
+                id="btn-add-event"
+                class="rounded-2xl bg-amber-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-amber-500/20 hover:bg-amber-600 flex items-center gap-2"
+              >
+                <i data-lucide="plus" class="w-4 h-4"></i> បន្ថែមកម្មវិធី
+              </button>
+            </div>
+
+            <div
+              class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+              id="events-container"
+            >
+              <!-- Events will be populated here by JavaScript -->
+              <div
+                class="p-6 border border-slate-200 rounded-2xl animate-pulse bg-slate-50 dark:bg-slate-800/50 dark:border-slate-700 h-32"
+              ></div>
+            </div>
+          </article>
+
+          <article
+            class="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90"
+          >
+            <p class="text-xs uppercase tracking-[0.35em] text-amber-500">
+              Wedding details
+            </p>
+            <h2
+              class="mt-2 text-xl font-semibold text-slate-900 dark:text-white"
+            >
+              Editor
+            </h2>
+            <form id="dashboard-form" class="mt-4 space-y-4">
+              <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label class="mb-2 block text-sm font-semibold"
+                    >ឈ្មោះកូនកំលោះ</label
+                  ><input
+                    id="groomName"
+                    type="text"
+                    class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  />
+                </div>
+                <div>
+                  <label class="mb-2 block text-sm font-semibold"
+                    >ឈ្មោះកូនក្រមុំ</label
+                  ><input
+                    id="brideName"
+                    type="text"
+                    class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  />
+                </div>
+              </div>
+              <div>
+                <label class="mb-2 block text-sm font-semibold"
+                  >កាលបរិច្ឆេទ</label
+                ><input
+                  id="eventDate"
+                  type="text"
+                  class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                />
+              </div>
+              <div>
+                <label class="mb-2 block text-sm font-semibold">ទីតាំង</label
+                ><input
+                  id="location"
+                  type="text"
+                  class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                />
+              </div>
+              <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label class="mb-2 block text-sm font-semibold"
+                    >ម៉ោងហែកូនកំលោះ</label
+                  ><input
+                    id="timeMorning"
+                    type="text"
+                    class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  />
+                </div>
+                <div>
+                  <label class="mb-2 block text-sm font-semibold"
+                    >ម៉ោងពិសាភោជនាហារ</label
+                  ><input
+                    id="timeEvening"
+                    type="text"
+                    class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  />
+                </div>
+              </div>
+              <div>
+                <label class="mb-2 block text-sm font-semibold"
+                  >តំណភ្ជាប់ផែនទី</label
+                ><input
+                  id="mapUrl"
+                  type="url"
+                  class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                />
+              </div>
+              <div>
+                <label class="mb-2 block text-sm font-semibold"
+                  >រូបភាព Cover</label
+                >
+                <input
+                  id="cover-image-input"
+                  type="file"
+                  accept="image/*"
+                  class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                />
+                <img
+                  id="cover-image-preview"
+                  class="mt-3 hidden max-h-40 w-full rounded-2xl object-cover border border-slate-200 dark:border-slate-700"
+                  alt="Cover preview"
+                />
+              </div>
+              <button
+                type="submit"
+                class="w-full rounded-2xl bg-amber-500 px-4 py-3 font-semibold text-white shadow-lg shadow-amber-500/20 transition hover:bg-amber-600"
+              >
+                រក្សាទុកព័ត៌មាន
+              </button>
+              <div
+                id="loading"
+                class="hidden rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:bg-amber-500/10 dark:text-amber-100"
+              >
+                កំពុងដំណើរការ...
+              </div>
+              <div
+                id="success-msg"
+                class="hidden rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-100"
+              >
+                រក្សាទុកបានជោគជ័យ!
+              </div>
+              <div
+                id="error-msg"
+                class="hidden rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-500/10 dark:text-red-100"
+              >
+                មានបញ្ហា! សូមពិនិត្យ Firebase Config ឬ Rules។
+              </div>
+            </form>
+          </article>
+          <article
+            class="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90"
+          >
+            <p class="text-xs uppercase tracking-[0.35em] text-amber-500">
+              Production notes
+            </p>
+            <h2
+              class="mt-2 text-xl font-semibold text-slate-900 dark:text-white"
+            >
+              Upgrade roadmap
+            </h2>
+            <ul
+              class="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300"
+            >
+              <li>
+                • Duplicate RSVP prevention and validation are now handled in
+                the invitation flow.
+              </li>
+              <li>
+                • Firestore rules should be deployed for admin-only writes and
+                public RSVP creation.
+              </li>
+              <li>
+                • Chart.js, pagination, and dark mode make the dashboard ready
+                for a final-year presentation.
+              </li>
+            </ul>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <div
+      id="toast"
+      class="pointer-events-none fixed bottom-4 right-4 z-50 flex w-[92vw] max-w-sm flex-col gap-2"
+    ></div>
+    <div
+      id="edit-modal"
+      class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/60 p-4"
+    >
+      <div
+        class="w-full max-w-md rounded-3xl border border-white/60 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900"
+      >
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
+            Edit RSVP
+          </h3>
+          <button
+            id="close-edit-modal"
+            class="text-slate-500 dark:text-slate-300"
+          >
+            ✕
+          </button>
+        </div>
+        <form id="edit-form" class="mt-4 space-y-3">
+          <input id="edit-id" type="hidden" />
+          <input
+            id="edit-name"
+            type="text"
+            class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+          />
+          <select
+            id="edit-type"
+            class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+          >
+            <option value="single">Single</option>
+            <option value="couple">Couple</option>
+          </select>
+          <button
+            type="submit"
+            class="w-full rounded-2xl bg-amber-500 px-4 py-3 font-semibold text-white hover:bg-amber-600"
+          >
+            Save changes
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div
+      id="scanner-modal"
+      class="fixed inset-0 z-[60] hidden items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm"
+    >
+      <div
+        class="w-full max-w-lg rounded-3xl border border-white/20 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900"
+      >
+        <div class="flex items-center justify-between mb-4">
+          <h3
+            class="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2"
+          >
+            <i data-lucide="qr-code" class="text-indigo-500"></i> Scan Guest QR
+          </h3>
+          <button
+            id="close-scanner-modal"
+            class="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+          >
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div
+          id="qr-reader"
+          class="w-full rounded-2xl overflow-hidden border-2 border-indigo-500/30"
+        ></div>
+        <div
+          id="scanner-result"
+          class="mt-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800 text-center text-sm font-semibold hidden"
+        ></div>
+      </div>
+    </div>
+
+    <div
+      id="event-modal"
+      class="fixed inset-0 z-[60] hidden items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm"
+    >
+      <div
+        class="w-full max-w-md rounded-3xl border border-white/20 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900"
+      >
+        <div class="flex items-center justify-between mb-4">
+          <h3
+            class="text-lg font-semibold text-slate-900 dark:text-white"
+            id="event-modal-title"
+          >
+            បន្ថែមកម្មវិធី
+          </h3>
+          <button
+            id="close-event-modal"
+            class="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+          >
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <form id="event-form" class="space-y-4">
+          <input type="hidden" id="event-id" />
+          <div>
+            <label
+              class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200"
+              >ឈ្មោះកម្មវិធី</label
+            >
+            <input
+              id="event-title"
+              type="text"
+              required
+              placeholder="ឧ. ពិធីក្រុងពាលី"
+              class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-700 outline-none transition focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+            />
+          </div>
+          <div>
+            <label
+              class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200"
+              >ម៉ោង</label
+            >
+            <input
+              id="event-time"
+              type="text"
+              required
+              placeholder="ឧ. ម៉ោង ២:០០ រសៀល"
+              class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-700 outline-none transition focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+            />
+          </div>
+          <div>
+            <label
+              class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200"
+              >ការពិពណ៌នា</label
+            >
+            <textarea
+              id="event-desc"
+              required
+              placeholder="ឧ. ជួបជុំសាច់ញាតិ ដើម្បីសុំសេចក្តីសុខសេចក្តីចម្រើន។"
+              rows="3"
+              class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-700 outline-none transition focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+            ></textarea>
+          </div>
+          <div>
+            <label
+              class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200"
+              >Icon (Lucide Name)</label
+            >
+            <input
+              id="event-icon"
+              type="text"
+              value="flower-2"
+              required
+              placeholder="ឧ. flower-2, sparkles, gift"
+              class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-700 outline-none transition focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+            />
+            <p class="text-xs text-slate-500 mt-1">
+              Find icons at
+              <a
+                href="https://lucide.dev/icons"
+                target="_blank"
+                class="text-amber-500 underline"
+                >lucide.dev</a
+              >
+            </p>
+          </div>
+          <button
+            type="submit"
+            class="w-full rounded-2xl bg-amber-500 px-4 py-3 font-semibold text-white shadow-lg shadow-amber-500/20 transition hover:bg-amber-600"
+          >
+            រក្សាទុក
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="./js/dashboard.fixed.js"></script>
+  </body>
 </html>
