@@ -282,6 +282,15 @@ function alreadySubmitted(name) {
 }
 
 window.generateCard = async function () {
+  // Prevent duplicate submission from same browser session
+  const savedFlag = localStorage.getItem("guestSaved");
+  const storedName = localStorage.getItem("guestName");
+  if (savedFlag === "true" && storedName) {
+    // Already saved from this browser: open invitation directly
+    window.showToast("សូមស្វាគមន៍វិញ — ទិន្នន័យរួចរាល់", "success");
+    window.showMainContent(storedName);
+    return;
+  }
   let finalName = "";
   let type = selectionType;
   let guestData = { timestamp: new Date() };
@@ -359,16 +368,24 @@ window.generateCard = async function () {
     );
     const querySnapshot = await getDocs(q);
     if (!querySnapshot.empty) {
+      // If server already has this name, mark session as saved so this browser won't try again,
+      // but still allow the guest to view the invitation.
       if (btnCouple) btnCouple.disabled = false;
       if (btnSingle) btnSingle.disabled = false;
       if (btnDecline) btnDecline.disabled = false;
-      alreadySubmitted(finalName); // cache it
-      return window.showToast("ឈ្មោះនេះបានបញ្ជាក់រួចហើយ!", "error");
+      alreadySubmitted(finalName); // cache locally
+      localStorage.setItem("guestName", finalName);
+      localStorage.setItem("guestSaved", "true");
+      window.showToast("ឈ្មោះនេះបានបញ្ជាក់រួចហើយ — កំពុងបើកអញ្ជើញ", "success");
+      return window.showMainContent(finalName);
     }
 
     // Save to Firebase
     const docRef = await addDoc(collection(db, "rsvps"), guestData);
     alreadySubmitted(finalName); // cache success
+    // Mark session as saved to prevent duplicates from this browser
+    localStorage.setItem("guestName", finalName);
+    localStorage.setItem("guestSaved", "true");
 
     let qrId = null;
     if (type === "decline") {
@@ -384,6 +401,14 @@ window.generateCard = async function () {
     if (btnSingle) btnSingle.disabled = false;
     if (btnDecline) btnDecline.disabled = false;
   }
+};
+
+// Allow guest to change name: clear session keys and reload
+window.logoutGuest = function () {
+  localStorage.removeItem("guestName");
+  localStorage.removeItem("guestSaved");
+  // keep local cache of submitted list for protection, do not clear 'wedding-rsvp-submitted'
+  window.location.reload();
 };
 
 // Add click listeners to buttons to avoid inline onclick with modules
@@ -497,6 +522,22 @@ onSnapshot(docRef, (docSnap) => {
     loadGallery();
   }
 });
+
+// Auto-open invitation when guestName is present in localStorage
+(function autoOpenGuestSession() {
+  try {
+    const storedName = localStorage.getItem("guestName");
+    if (storedName) {
+      // small delay to allow page resources to render
+      setTimeout(() => {
+        window.showMainContent(storedName);
+        window.showToast("សូមស្វាគមន៍វិញ!", "success");
+      }, 240);
+    }
+  } catch (err) {
+    console.error("Auto-open guest session failed", err);
+  }
+})();
 
 // Initialize countdown
 startCountdown();

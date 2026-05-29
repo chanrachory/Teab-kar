@@ -443,15 +443,59 @@ function listenToDetails() {
     if (elements.mediaCoverPreview) {
       if (data.coverImageUrl) {
         elements.mediaCoverPreview.src = data.coverImageUrl;
-        elements.mediaCoverPreview.classList.remove("hidden");
-        elements.mediaCoverEmpty.classList.add("hidden");
-      } else if (data.coverImageId) {
-        elements.mediaCoverPreview.src = getImageUrl(data.coverImageId, {
-          width: 1200,
-          height: 800,
-          crop: "fill",
+        allEvents = snapshot.docs.map((item) => ({
+          id: item.id,
+          ...item.data(),
+        }));
+        // If any event is missing a numeric `order`, normalize orders based on createdAt (oldest -> smallest order)
+        const missingOrder = allEvents.some((e) => typeof e.order !== "number");
+        if (missingOrder) {
+          // compute desired order by createdAt ascending
+          const byCreatedAsc = allEvents.slice().sort((a, b) => {
+            const ta = a.createdAt?.toDate
+              ? a.createdAt.toDate().getTime()
+              : new Date(a.createdAt || 0).getTime();
+            const tb = b.createdAt?.toDate
+              ? b.createdAt.toDate().getTime()
+              : new Date(b.createdAt || 0).getTime();
+            return ta - tb;
+          });
+          // prepare updates for docs that lack order
+          const updates = [];
+          byCreatedAsc.forEach((ev, idx) => {
+            if (typeof ev.order !== "number")
+              updates.push({ id: ev.id, order: idx + 1 });
+          });
+          // persist normalization to Firestore
+          (async () => {
+            try {
+              for (const u of updates) {
+                await updateDoc(doc(db, "events", u.id), { order: u.order });
+              }
+              console.info("Normalized event order fields");
+            } catch (err) {
+              console.error("Failed to normalize event order:", err);
+            }
+          })();
+          // update local allEvents so UI updates immediately
+          allEvents = byCreatedAsc.map((ev, idx) => ({
+            ...ev,
+            order: typeof ev.order === "number" ? ev.order : idx + 1,
+          }));
+        }
+        // ensure consistent ordering by `order` when available
+        allEvents.sort((a, b) => {
+          if (typeof a.order === "number" && typeof b.order === "number")
+            return a.order - b.order;
+          const ta = a.createdAt?.toDate
+            ? a.createdAt.toDate().getTime()
+            : new Date(a.createdAt || 0).getTime();
+          const tb = b.createdAt?.toDate
+            ? b.createdAt.toDate().getTime()
+            : new Date(b.createdAt || 0).getTime();
+          return ta - tb; // fallback: older first
         });
-        elements.mediaCoverPreview.classList.remove("hidden");
+        renderEvents();
         elements.mediaCoverEmpty.classList.add("hidden");
       } else {
         elements.mediaCoverPreview.classList.add("hidden");
