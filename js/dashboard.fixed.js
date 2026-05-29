@@ -15,7 +15,11 @@ import {
   updateDoc,
   addDoc,
 } from "../firebase/firebase-config.js";
-import { getImageUrl, uploadImage } from "../services/cloudinary.js";
+import {
+  getImageUrl,
+  uploadImage,
+  previewImage,
+} from "../services/cloudinary.js";
 
 const docRef = doc(db, "wedding", "details");
 const rsvpRef = collection(db, "rsvps");
@@ -65,6 +69,21 @@ const elements = {
   dashboardForm: document.getElementById("dashboard-form"),
   coverImageInput: document.getElementById("cover-image-input"),
   coverImagePreview: document.getElementById("cover-image-preview"),
+  // Media panel elements
+  galleryInput: document.getElementById("gallery-input"),
+  galleryPreviewList: document.getElementById("gallery-preview-list"),
+  uploadGalleryBtn: document.getElementById("upload-gallery-btn"),
+  galleryCategory: document.getElementById("gallery-category"),
+  mediaCoverPreview: document.getElementById("media-cover-preview"),
+  mediaCoverEmpty: document.getElementById("media-cover-empty"),
+  mediaTotalCount: document.getElementById("media-total-count"),
+  mediaLatestImg: document.getElementById("media-latest-img"),
+  mediaLatestEmpty: document.getElementById("media-latest-empty"),
+  mediaGrid: document.getElementById("media-grid"),
+  mediaEmpty: document.getElementById("media-empty"),
+  saveBtn:
+    document.getElementById("dashboard-save-btn") ||
+    document.querySelector("#dashboard-form button[type=submit]"),
   btnExportExcel: document.getElementById("btn-export-excel"),
   btnExportPdf: document.getElementById("btn-export-pdf"),
   btnScanQr: document.getElementById("btn-scan-qr"),
@@ -301,7 +320,10 @@ async function loadWeddingDetails() {
       document.getElementById("timeMorning").value = data.timeMorning || "";
       document.getElementById("timeEvening").value = data.timeEvening || "";
       document.getElementById("mapUrl").value = data.mapUrl || "";
-      if (data.coverImageId) {
+      if (data.coverImageUrl) {
+        elements.coverImagePreview.src = data.coverImageUrl;
+        elements.coverImagePreview.classList.remove("hidden");
+      } else if (data.coverImageId) {
         elements.coverImagePreview.src = getImageUrl(data.coverImageId, {
           width: 600,
           height: 400,
@@ -363,6 +385,74 @@ function renderEvents() {
     )
     .join("");
   lucide.createIcons();
+}
+
+// Listen to wedding details document for realtime media and cover updates
+let unsubscribeDetails = null;
+function listenToDetails() {
+  if (unsubscribeDetails) unsubscribeDetails();
+  unsubscribeDetails = onSnapshot(docRef, (snap) => {
+    if (!snap.exists()) return;
+    const data = snap.data();
+    // Update cover preview in media panel
+    if (elements.mediaCoverPreview) {
+      if (data.coverImageUrl) {
+        elements.mediaCoverPreview.src = data.coverImageUrl;
+        elements.mediaCoverPreview.classList.remove("hidden");
+        elements.mediaCoverEmpty.classList.add("hidden");
+      } else if (data.coverImageId) {
+        elements.mediaCoverPreview.src = getImageUrl(data.coverImageId, {
+          width: 1200,
+          height: 800,
+          crop: "fill",
+        });
+        elements.mediaCoverPreview.classList.remove("hidden");
+        elements.mediaCoverEmpty.classList.add("hidden");
+      } else {
+        elements.mediaCoverPreview.classList.add("hidden");
+        elements.mediaCoverEmpty.classList.remove("hidden");
+      }
+    }
+
+    // Render gallery images
+    const gallery = data.galleryImages || [];
+    if (elements.mediaTotalCount)
+      elements.mediaTotalCount.textContent = gallery.length;
+
+    if (gallery.length) {
+      const latest = gallery[gallery.length - 1];
+      if (elements.mediaLatestImg) {
+        elements.mediaLatestImg.src = latest.url || latest;
+        elements.mediaLatestImg.classList.remove("hidden");
+        elements.mediaLatestEmpty.classList.add("hidden");
+      }
+      // Populate grid
+      if (elements.mediaGrid) {
+        elements.mediaGrid.innerHTML = gallery
+          .slice(-9)
+          .reverse()
+          .map(
+            (img, idx) => `
+            <div class="rounded-xl overflow-hidden h-24 relative group">
+              <img src="${img.url || img}" class="w-full h-full object-cover" />
+              <button data-index="${idx}" data-publicid="${img.publicId || ""}" class="absolute top-1 right-1 bg-black/40 text-white rounded-full p-1 text-xs opacity-0 group-hover:opacity-100 transition-opacity">🗑</button>
+            </div>
+          `,
+          )
+          .join("");
+        elements.mediaEmpty.classList.add("hidden");
+      }
+    } else {
+      if (elements.mediaLatestImg) {
+        elements.mediaLatestImg.classList.add("hidden");
+        elements.mediaLatestEmpty.classList.remove("hidden");
+      }
+      if (elements.mediaGrid) {
+        elements.mediaGrid.innerHTML = "";
+        elements.mediaEmpty.classList.remove("hidden");
+      }
+    }
+  });
 }
 
 function openEventModal(mode = "add", eventItem = null) {
@@ -439,6 +529,7 @@ function enterDashboardMode() {
   loadWeddingDetails();
   listenToRsvps();
   listenToEvents();
+  listenToDetails();
 }
 function exitDashboardMode() {
   elements.loginSection.classList.remove("hidden");
@@ -558,32 +649,143 @@ function attachEvents() {
   });
   elements.btnExportExcel?.addEventListener("click", exportToExcel);
   elements.btnExportPdf?.addEventListener("click", exportToPdf);
+  // Use URL.createObjectURL for fast preview and revoke previous object URLs
+  let currentPreviewUrl = null;
   elements.coverImageInput?.addEventListener("change", (event) => {
     const [file] = event.target.files || [];
     if (!file) {
+      if (currentPreviewUrl) {
+        URL.revokeObjectURL(currentPreviewUrl);
+        currentPreviewUrl = null;
+      }
       elements.coverImagePreview.classList.add("hidden");
+      elements.coverImagePreview.src = "";
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => {
-      elements.coverImagePreview.src = reader.result;
+    try {
+      if (currentPreviewUrl) URL.revokeObjectURL(currentPreviewUrl);
+      currentPreviewUrl = previewImage(file); // creates object URL
+      elements.coverImagePreview.src = currentPreviewUrl;
       elements.coverImagePreview.classList.remove("hidden");
-    };
-    reader.readAsDataURL(file);
+    } catch (err) {
+      console.error("Preview failed:", err);
+      elements.coverImagePreview.classList.add("hidden");
+    }
   });
+
+  // Gallery preview handling (multiple files)
+  let galleryPreviewUrls = [];
+  elements.galleryInput?.addEventListener("change", (event) => {
+    const files = Array.from(event.target.files || []);
+    // clear previous previews
+    galleryPreviewUrls.forEach((u) => URL.revokeObjectURL(u));
+    galleryPreviewUrls = [];
+    elements.galleryPreviewList.innerHTML = "";
+    if (!files.length) return;
+    files.slice(0, 12).forEach((file, idx) => {
+      const url = URL.createObjectURL(file);
+      galleryPreviewUrls.push(url);
+      const thumb = document.createElement("div");
+      thumb.className =
+        "relative rounded-xl overflow-hidden h-20 cursor-pointer";
+      thumb.innerHTML = `<img src="${url}" class="w-full h-full object-cover transform transition-transform duration-300 hover:scale-110" /><button data-idx="${idx}" class="absolute top-1 right-1 bg-black/40 text-white rounded-full p-1 text-xs">✕</button>`;
+      elements.galleryPreviewList.appendChild(thumb);
+      // remove handler
+      thumb.querySelector("button").addEventListener("click", (e) => {
+        e.stopPropagation();
+        const input = elements.galleryInput;
+        const dt = new DataTransfer();
+        files.forEach((f, i) => {
+          if (i !== idx) dt.items.add(f);
+        });
+        input.files = dt.files;
+        // trigger change to refresh previews
+        input.dispatchEvent(new Event("change"));
+      });
+    });
+  });
+
+  // Upload gallery button
+  elements.uploadGalleryBtn?.addEventListener("click", async (e) => {
+    e.preventDefault();
+    const files = Array.from(elements.galleryInput?.files || []);
+    if (!files.length) return showToast("No images selected", "error");
+    const category = elements.galleryCategory?.value || "prewedding";
+    elements.uploadGalleryBtn.disabled = true;
+    elements.uploadGalleryBtn.textContent = "Uploading...";
+    try {
+      const uploaded = [];
+      for (const file of files) {
+        try {
+          const res = await uploadImage(file);
+          uploaded.push({
+            url: res.secure_url,
+            publicId: res.public_id,
+            category,
+            uploadedAt: new Date().toISOString(),
+          });
+          console.info("Uploaded gallery image:", res.secure_url);
+        } catch (err) {
+          console.error("Failed to upload image:", err);
+        }
+      }
+      if (uploaded.length) {
+        // merge into Firestore document
+        const snap = await getDoc(docRef);
+        const existing = snap.exists() ? snap.data().galleryImages || [] : [];
+        const merged = [...existing, ...uploaded];
+        await setDoc(docRef, {
+          ...(snap.exists() ? snap.data() : {}),
+          galleryImages: merged,
+        });
+        showToast(`Uploaded ${uploaded.length} images`, "success");
+        // clear input & previews
+        elements.galleryInput.value = "";
+        elements.galleryPreviewList.innerHTML = "";
+      } else {
+        showToast("No images were uploaded", "error");
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Gallery upload failed", "error");
+    } finally {
+      elements.uploadGalleryBtn.disabled = false;
+      elements.uploadGalleryBtn.textContent = "Upload";
+    }
+  });
+
   elements.dashboardForm.addEventListener("submit", async (event) => {
     event.preventDefault();
+    // Disable save and show loading
+    const saveBtn = elements.saveBtn;
+    if (saveBtn) saveBtn.disabled = true;
     elements.loading.classList.remove("hidden");
     elements.successMsg.classList.add("hidden");
     elements.errorMsg.classList.add("hidden");
+
     try {
-      let coverImageId = null;
+      const existingSnap = await getDoc(docRef);
+      const existingData = existingSnap.exists() ? existingSnap.data() : {};
+
+      // If a new file is selected, upload first
       const file = elements.coverImageInput?.files?.[0];
+      let coverImageUrl = existingData.coverImageUrl || "";
+      let coverImageId = existingData.coverImageId || "";
+
       if (file) {
-        const uploadResult = await uploadImage(file, "teabkar_wedding");
-        coverImageId = uploadResult.public_id;
+        try {
+          console.info("Uploading cover image...");
+          const uploadResult = await uploadImage(file); // uses default unsigned preset
+          coverImageUrl = uploadResult.secure_url || coverImageUrl;
+          coverImageId = uploadResult.public_id || coverImageId;
+          console.info("Upload result:", uploadResult);
+        } catch (err) {
+          console.error("Image upload failed", err);
+          throw new Error(err.message || "Image upload failed");
+        }
       }
-      const existing = await getDoc(docRef);
+
+      // Save wedding details with coverImageUrl (secure) and public id
       await setDoc(docRef, {
         groomName: document.getElementById("groomName").value,
         brideName: document.getElementById("brideName").value,
@@ -592,8 +794,10 @@ function attachEvents() {
         timeMorning: document.getElementById("timeMorning").value,
         timeEvening: document.getElementById("timeEvening").value,
         mapUrl: document.getElementById("mapUrl").value,
-        coverImageId: coverImageId || existing?.data()?.coverImageId || "",
+        coverImageUrl: coverImageUrl || "",
+        coverImageId: coverImageId || "",
       });
+
       elements.loading.classList.add("hidden");
       elements.successMsg.classList.remove("hidden");
       setTimeout(() => elements.successMsg.classList.add("hidden"), 2500);
@@ -602,7 +806,9 @@ function attachEvents() {
       console.error(error);
       elements.loading.classList.add("hidden");
       elements.errorMsg.classList.remove("hidden");
-      showToast("Unable to save details", "error");
+      showToast(error.message || "Unable to save details", "error");
+    } finally {
+      if (elements.saveBtn) elements.saveBtn.disabled = false;
     }
   });
   elements.btnScanQr.addEventListener("click", startQrScanner);
@@ -640,6 +846,40 @@ function attachEvents() {
       return;
     }
     if (action === "edit-event") openEventModal("edit", item);
+  });
+  // Media grid deletion (remove from Firestore galleryImages array)
+  elements.mediaGrid?.addEventListener("click", async (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    const publicId = btn.dataset.publicid;
+    const idx = Number(btn.dataset.index);
+    if (!window.confirm("Remove this image from gallery?")) return;
+    try {
+      const snap = await getDoc(docRef);
+      const existing = snap.exists() ? snap.data().galleryImages || [] : [];
+      // Remove by publicId if available, otherwise remove by matching index from end
+      let updated = existing.filter((item) => {
+        if (publicId && item.publicId) return item.publicId !== publicId;
+        return true;
+      });
+      // If publicId not matched and idx provided, try removing by position
+      if (updated.length === existing.length && !publicId) {
+        // remove the (idx)th item in the displayed reversed slice
+        const slice = existing.slice(-9).reverse();
+        const itemToRemove = slice[idx];
+        if (itemToRemove) {
+          updated = existing.filter((it) => it !== itemToRemove);
+        }
+      }
+      await setDoc(docRef, {
+        ...(snap.exists() ? snap.data() : {}),
+        galleryImages: updated,
+      });
+      showToast("Image removed from gallery", "success");
+    } catch (err) {
+      console.error(err);
+      showToast("Unable to remove image", "error");
+    }
   });
   elements.eventForm.addEventListener("submit", async (event) => {
     event.preventDefault();

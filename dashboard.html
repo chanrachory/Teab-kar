@@ -481,19 +481,54 @@
                 <label class="mb-2 block text-sm font-semibold"
                   >រូបភាព Cover</label
                 >
-                <input
-                  id="cover-image-input"
-                  type="file"
-                  accept="image/*"
-                  class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-700 outline-none focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                />
-                <img
-                  id="cover-image-preview"
-                  class="mt-3 hidden max-h-40 w-full rounded-2xl object-cover border border-slate-200 dark:border-slate-700"
-                  alt="Cover preview"
-                />
+                <div class="flex flex-col sm:flex-row items-start gap-4">
+                  <div class="w-full sm:w-1/2">
+                    <label
+                      for="cover-image-input"
+                      class="group flex cursor-pointer items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white/50 p-6 text-center hover:border-amber-400 hover:bg-amber-50 dark:border-slate-700 dark:bg-slate-800/50"
+                    >
+                      <div>
+                        <svg
+                          class="mx-auto mb-2 h-8 w-8 text-amber-500"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="1.5"
+                            d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7M16 3v4M8 3v4m0 0h8"
+                          />
+                        </svg>
+                        <p class="text-sm text-slate-600 dark:text-slate-300">
+                          Click to choose or drag an image (recommended
+                          1200x800)
+                        </p>
+                        <input
+                          id="cover-image-input"
+                          type="file"
+                          accept="image/*"
+                          class="sr-only"
+                        />
+                      </div>
+                    </label>
+                  </div>
+                  <div class="w-full sm:w-1/2">
+                    <div
+                      class="rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-800"
+                    >
+                      <img
+                        id="cover-image-preview"
+                        class="hidden h-40 w-full object-cover"
+                        alt="Cover preview"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
               <button
+                id="dashboard-save-btn"
                 type="submit"
                 class="w-full rounded-2xl bg-amber-500 px-4 py-3 font-semibold text-white shadow-lg shadow-amber-500/20 transition hover:bg-amber-600"
               >
@@ -520,32 +555,115 @@
             </form>
           </article>
           <article
-            class="rounded-3xl border border-white/60 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90"
+            id="media-panel"
+            class="rounded-3xl border border-white/10 bg-gradient-to-br from-black/40 via-black/30 to-white/5 p-5 shadow-2xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/60 lg:sticky lg:top-6"
           >
             <p class="text-xs uppercase tracking-[0.35em] text-amber-500">
-              Production notes
+              Media
             </p>
-            <h2
-              class="mt-2 text-xl font-semibold text-slate-900 dark:text-white"
-            >
-              Upgrade roadmap
+            <h2 class="mt-2 text-xl font-semibold text-slate-100">
+              Wedding Media Preview
             </h2>
-            <ul
-              class="mt-4 space-y-3 text-sm text-slate-600 dark:text-slate-300"
-            >
-              <li>
-                • Duplicate RSVP prevention and validation are now handled in
-                the invitation flow.
-              </li>
-              <li>
-                • Firestore rules should be deployed for admin-only writes and
-                public RSVP creation.
-              </li>
-              <li>
-                • Chart.js, pagination, and dark mode make the dashboard ready
-                for a final-year presentation.
-              </li>
-            </ul>
+            <div class="mt-4 grid gap-4">
+              <div
+                class="rounded-2xl overflow-hidden border border-white/5 p-3 bg-white/5"
+              >
+                <p class="text-xs text-slate-300 mb-2">Cover Preview</p>
+                <div
+                  class="w-full h-36 rounded-xl overflow-hidden bg-black/30 flex items-center justify-center"
+                >
+                  <img
+                    id="media-cover-preview"
+                    src=""
+                    alt="Cover preview"
+                    class="object-cover w-full h-full hidden"
+                  />
+                  <div id="media-cover-empty" class="text-slate-400">
+                    No cover image
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="rounded-2xl overflow-hidden border border-white/5 p-3 bg-white/5"
+              >
+                <p class="text-xs text-slate-300 mb-2">Upload Gallery Images</p>
+                <div class="flex gap-2">
+                  <select
+                    id="gallery-category"
+                    class="rounded-xl bg-black/20 px-3 py-2 text-sm text-slate-200"
+                  >
+                    <option value="prewedding">Pre-Wedding</option>
+                    <option value="ceremony">Ceremony</option>
+                    <option value="reception">Reception</option>
+                  </select>
+                  <label
+                    for="gallery-input"
+                    class="cursor-pointer rounded-xl bg-amber-600 px-3 py-2 text-white text-sm"
+                    >Choose</label
+                  >
+                  <input
+                    id="gallery-input"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    class="sr-only"
+                  />
+                  <button
+                    id="upload-gallery-btn"
+                    class="ml-auto rounded-xl bg-emerald-600 px-3 py-2 text-sm text-white"
+                  >
+                    Upload
+                  </button>
+                </div>
+                <div
+                  id="gallery-preview-list"
+                  class="mt-3 grid grid-cols-4 gap-2"
+                ></div>
+              </div>
+
+              <div
+                class="rounded-2xl overflow-hidden border border-white/5 p-3 bg-white/5"
+              >
+                <div class="flex items-center justify-between">
+                  <p class="text-xs text-slate-300">Gallery Stats</p>
+                  <div id="media-total-count" class="text-sm text-amber-400">
+                    0
+                  </div>
+                </div>
+                <div class="mt-3 grid grid-cols-3 gap-2">
+                  <div class="col-span-3">
+                    <p class="text-xs text-slate-400 mb-2">Latest Upload</p>
+                    <div
+                      class="w-full h-24 rounded-xl overflow-hidden bg-black/20 flex items-center justify-center"
+                    >
+                      <img
+                        id="media-latest-img"
+                        src=""
+                        alt="Latest"
+                        class="object-cover w-full h-full hidden"
+                      />
+                      <div id="media-latest-empty" class="text-slate-400">
+                        No images yet
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="rounded-2xl overflow-hidden border border-white/5 p-3 bg-white/5"
+              >
+                <p class="text-xs text-slate-300 mb-2">Uploaded Gallery</p>
+                <div
+                  id="media-grid"
+                  class="grid grid-cols-3 gap-2 min-h-[80px]"
+                ></div>
+                <div id="media-empty" class="text-sm text-slate-400 mt-3">
+                  No gallery images uploaded yet.
+                </div>
+              </div>
+            </div>
           </article>
         </section>
       </main>

@@ -47,6 +47,7 @@ window.showToast = function (message, type = "info") {
 
 // --- GALLERY & LIGHTBOX ---
 let currentGalleryTab = "prewedding";
+let galleryFromFirestore = [];
 
 window.switchGalleryTab = function (tab) {
   currentGalleryTab = tab;
@@ -89,18 +90,26 @@ window.closeLightbox = function () {
 function loadGallery() {
   const container = document.getElementById("gallery-container");
   if (!container) return;
-
-  const images =
-    currentGalleryTab === "prewedding" ? preWeddingImages : ceremonyImages;
+  // Prefer gallery from Firestore when available
+  let images = [];
+  if (galleryFromFirestore && galleryFromFirestore.length) {
+    images = galleryFromFirestore.filter(
+      (g) => g.category === currentGalleryTab,
+    );
+  } else {
+    images =
+      currentGalleryTab === "prewedding"
+        ? preWeddingImages.map((id) => ({
+            url: getImageUrl(id, { width: 800, height: 800, crop: "fill" }),
+          }))
+        : ceremonyImages.map((id) => ({
+            url: getImageUrl(id, { width: 800, height: 800, crop: "fill" }),
+          }));
+  }
 
   const galleryHTML = images
-    .map((id) => {
-      const imageUrl = getImageUrl(id, {
-        width: 800,
-        height: 800,
-        crop: "fill",
-      });
-
+    .map((item) => {
+      const imageUrl = item.url || item;
       return `
       <div onclick="openLightbox('${imageUrl}')" class="aspect-square bg-gray-100 rounded-2xl overflow-hidden shadow-md group cursor-pointer relative">
         <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 z-10 flex items-center justify-center">
@@ -466,6 +475,26 @@ onSnapshot(docRef, (docSnap) => {
       const iframe = document.getElementById("map-iframe-display");
       if (iframe) iframe.parentElement.classList.add("hidden");
     }
+    // Cover image: prefer secure URL then public id
+    const cover =
+      data.coverImageUrl ||
+      (data.coverImageId
+        ? getImageUrl(data.coverImageId, {
+            width: 2000,
+            height: 1200,
+            crop: "fill",
+          })
+        : null);
+    if (cover) {
+      // Update all hero background elements
+      document.querySelectorAll(".hero-bg").forEach((el) => {
+        el.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('${cover}')`;
+      });
+    }
+
+    // Gallery updates
+    galleryFromFirestore = data.galleryImages || [];
+    loadGallery();
   }
 });
 
