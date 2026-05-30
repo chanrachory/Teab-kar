@@ -447,6 +447,82 @@
         </div>
       </section>
 
+      <!-- LOCATION & TIME -->
+      <section
+        class="py-24 px-6 bg-gradient-to-b from-amber-50 to-white text-black"
+      >
+        <div class="max-w-6xl mx-auto">
+          <div class="text-center px-4 mb-16">
+            <h3
+              class="font-moul sm:text-3xl text-amber-600 underline underline-offset-8 decoration-amber-200/50 leading-loose"
+            >
+              ទីតាំង ដើម្បីចូលរួម
+            </h3>
+            <p class="text-gray-500 mt-4 font-kantumruy">
+              សូមលោកលោកស្រីមកដល់ឯកន័យលម្អិត
+            </p>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-12 items-center">
+            <!-- Time Schedule -->
+            <div class="space-y-8">
+              <div
+                class="bg-white rounded-2xl p-8 shadow-lg border-l-4 border-amber-500"
+              >
+                <div class="flex items-center gap-4 mb-4">
+                  <i data-lucide="sunrise" class="w-6 h-6 text-amber-600"></i>
+                  <h4 class="font-moul text-xl text-amber-800">
+                    ម៉ោងហែកូនកំលោះ
+                  </h4>
+                </div>
+                <p
+                  id="time-morning-display"
+                  class="text-2xl font-kantumruy text-amber-600 font-semibold"
+                >
+                  ម៉ោង ០៧:០០ ព្រឹក
+                </p>
+                <p class="text-gray-600 text-sm mt-2">
+                  ពិធីហែជំនូន និងពិធីកាត់សក់
+                </p>
+              </div>
+
+              <div
+                class="bg-white rounded-2xl p-8 shadow-lg border-l-4 border-amber-500"
+              >
+                <div class="flex items-center gap-4 mb-4">
+                  <i data-lucide="sunset" class="w-6 h-6 text-amber-600"></i>
+                  <h4 class="font-moul text-xl text-amber-800">
+                    ម៉ោងពិសាភោជនាហារ
+                  </h4>
+                </div>
+                <p
+                  id="time-evening-display"
+                  class="text-2xl font-kantumruy text-amber-600 font-semibold"
+                >
+                  ម៉ោង ០៤:០០ រសៀល
+                </p>
+                <p class="text-gray-600 text-sm mt-2">
+                  ពិសាភោជនាហារ និងកម្មវិធីរាង្វាន់
+                </p>
+              </div>
+            </div>
+
+            <!-- Map -->
+            <div class="hidden" id="map-container">
+              <iframe
+                id="map-iframe-display"
+                width="100%"
+                height="450"
+                style="border: 0; border-radius: 1rem"
+                allowfullscreen=""
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+              ></iframe>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- CAMBODIAN WEDDING TIMELINE -->
       <section class="py-24 px-6 bg-slate-50 text-black">
         <div class="max-w-4xl mx-auto">
