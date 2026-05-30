@@ -539,8 +539,60 @@ onSnapshot(docRef, (docSnap) => {
   }
 })();
 
+function loadTimelineEvents() {
+  const container = document.getElementById("timeline-container");
+  if (!container) return;
+
+  const eventRef = collection(db, "events");
+  onSnapshot(eventRef, (snapshot) => {
+    let events = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
+    
+    events.sort((a, b) => {
+      if (typeof a.order === "number" && typeof b.order === "number")
+        return a.order - b.order;
+      const ta = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt || 0).getTime();
+      const tb = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt || 0).getTime();
+      return ta - tb; 
+    });
+
+    if (events.length === 0) {
+      events = [
+        { title: "ពិធីក្រុងពាលី", time: "ម៉ោង ២:០០ រសៀល", desc: "ជួបជុំសាច់ញាតិ ដើម្បីសុំសេចក្តីសុខសេចក្តីចម្រើន។", icon: "flower-2" },
+        { title: "ពិធីសូត្រមន្ត", time: "ម៉ោង ៤:០០ រសៀល", desc: "និមន្តព្រះសង្ឃចម្រើនព្រះបរិត្ត។", icon: "sparkles" },
+        { title: "ពិធីហែជំនូន", time: "ម៉ោង ៧:០០ ព្រឹក (ថ្ងៃបន្ទាប់)", desc: "ដង្ហែរជំនូនចូលរោងជ័យ។", icon: "gift" },
+        { title: "ពិធីកាត់សក់", time: "ម៉ោង ៩:០០ ព្រឹក", desc: "កាត់សក់បង្កក់សិរី និងបណ្ដេញឧបទ្រពចង្រៃ។", icon: "scissors" },
+        { title: "ពិធីចងដៃ", time: "ម៉ោង ១០:៣០ ព្រឹក", desc: "សាច់ញាតិចាស់ទុំចងដៃជូនពរជ័យសិរីសួស្តី។", icon: "gem" },
+        { title: "ពិធីពិសាភោជនាហារ", time: "ម៉ោង ៤:០០ រសៀល", desc: "សូមគោរពអញ្ជើញភ្ញៀវកិត្តិយសទាំងអស់ពិសាភោជនាហារ។", icon: "utensils-crossed" }
+      ];
+    }
+
+    container.innerHTML = events.map((ev) => `
+      <div class="relative pl-10 md:pl-16 group">
+        <div class="absolute -left-[11px] bg-amber-500 w-5 h-5 rounded-full border-4 border-white shadow group-hover:scale-125 transition-transform duration-300"></div>
+        <div class="bg-white p-6 rounded-2xl shadow-lg border border-amber-100 hover:shadow-xl transition-shadow flex gap-4 items-start">
+          <div class="bg-amber-50 p-3 rounded-xl text-amber-600 hidden sm:block">
+            <i data-lucide="${ev.icon || 'flower-2'}" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h4 class="font-moul text-lg text-amber-700 mb-2">${ev.title}</h4>
+            <p class="text-amber-600 font-bold mb-2">${ev.time}</p>
+            <p class="text-gray-600 text-sm">${ev.desc}</p>
+          </div>
+        </div>
+      </div>
+    `).join("");
+    
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+  });
+}
+
 // Initialize countdown
 startCountdown();
 
 // Initialize gallery
 loadGallery();
+
+// Initialize timeline
+loadTimelineEvents();
