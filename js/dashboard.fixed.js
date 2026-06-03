@@ -24,19 +24,23 @@ import {
 const docRef = doc(db, "wedding", "details");
 const rsvpRef = collection(db, "rsvps");
 const eventRef = collection(db, "events");
+const programRef = collection(db, "programs");
 const EVENTS_KEY = "dashboard-events";
+const PROGRAMS_KEY = "dashboard-programs";
 const DEMO_ADMIN_EMAIL = "admin@teabkar.com";
 const DEMO_ADMIN_PASSWORD = "admin1234";
 
 let allRsvps = [];
 let filteredRsvps = [];
 let allEvents = [];
+let allPrograms = [];
 let currentPage = 1;
 const rowsPerPage = 7;
 let dailyChart;
 let typeChart;
 let unsubscribeRsvps = null;
 let unsubscribeEvents = null;
+let unsubscribePrograms = null;
 let html5QrcodeScanner = null;
 
 const elements = {
@@ -115,6 +119,17 @@ const elements = {
   eventDesc: document.getElementById("event-desc"),
   eventIcon: document.getElementById("event-icon"),
   eventModalTitle: document.getElementById("event-modal-title"),
+  // Program elements
+  programsContainer: document.getElementById("programs-container"),
+  btnAddProgram: document.getElementById("btn-add-program"),
+  programModal: document.getElementById("program-modal"),
+  closeProgramModal: document.getElementById("close-program-modal"),
+  programForm: document.getElementById("program-form"),
+  programId: document.getElementById("program-id"),
+  programName: document.getElementById("program-name"),
+  programDesc: document.getElementById("program-desc"),
+  programIcon: document.getElementById("program-icon"),
+  programModalTitle: document.getElementById("program-modal-title"),
 };
 
 function showToast(message, tone = "info") {
@@ -432,6 +447,82 @@ function renderEvents() {
   lucide.createIcons();
 }
 
+function getStoredPrograms() {
+  try {
+    return JSON.parse(localStorage.getItem(PROGRAMS_KEY) || "[]");
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+}
+
+function saveStoredPrograms(programs) {
+  localStorage.setItem(PROGRAMS_KEY, JSON.stringify(programs));
+}
+
+function listenToPrograms() {
+  if (localStorage.getItem("dashboard-demo-auth") === "true") {
+    allPrograms = getStoredPrograms();
+    renderPrograms();
+    return;
+  }
+
+  const q = query(programRef, orderBy("createdAt", "desc"));
+  unsubscribePrograms = onSnapshot(q, (snapshot) => {
+    allPrograms = snapshot.docs.map((item) => ({
+      id: item.id,
+      ...item.data(),
+    }));
+    // ensure consistent ordering by `order` when available
+    allPrograms.sort((a, b) => {
+      if (typeof a.order === "number" && typeof b.order === "number")
+        return a.order - b.order;
+      const ta = a.createdAt?.toDate
+        ? a.createdAt.toDate().getTime()
+        : new Date(a.createdAt || 0).getTime();
+      const tb = b.createdAt?.toDate
+        ? b.createdAt.toDate().getTime()
+        : new Date(b.createdAt || 0).getTime();
+      return tb - ta; // fallback: newest first
+    });
+    renderPrograms();
+  });
+}
+
+function renderPrograms() {
+  if (!allPrograms.length) {
+    elements.programsContainer.innerHTML =
+      '<div class="rounded-2xl border border-dashed border-slate-300 p-6 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-300">No programs yet. Click "បន្ថែមពិធីការ" to create one.</div>';
+    return;
+  }
+  // Render programs in order (by `order` then fallback to createdAt desc)
+  const sorted = allPrograms.slice().sort((a, b) => {
+    if (typeof a.order === "number" && typeof b.order === "number")
+      return a.order - b.order;
+    const ta = a.createdAt?.toDate
+      ? a.createdAt.toDate().getTime()
+      : new Date(a.createdAt || 0).getTime();
+    const tb = b.createdAt?.toDate
+      ? b.createdAt.toDate().getTime()
+      : new Date(b.createdAt || 0).getTime();
+    return tb - ta;
+  });
+
+  elements.programsContainer.innerHTML = sorted
+    .map((programItem) => {
+      // Backward compatibility: use 'description' if available, fallback to 'desc' for old data
+      const desc = programItem.description || programItem.desc || "";
+      return `<article class="rounded-3xl border border-slate-200 bg-slate-50 p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800/70"><div class="flex items-start justify-between gap-3"><div class="flex items-start gap-3"><div class="rounded-2xl bg-rose-100 p-3 text-rose-700 dark:bg-rose-500/10 dark:text-rose-200"><i data-lucide="${programItem.icon || "sparkles"}" class="h-5 w-5"></i></div><div><h3 class="text-lg font-semibold text-slate-900 dark:text-white">${programItem.name}</h3><p class="mt-2 text-sm text-slate-600 dark:text-slate-300">${desc}</p></div></div><div class="flex gap-2">
+          <button data-action="move-up-program" data-id="${programItem.id}" title="Move up" class="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200">↑</button>
+          <button data-action="move-down-program" data-id="${programItem.id}" title="Move down" class="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200">↓</button>
+          <button data-action="edit-program" data-id="${programItem.id}" class="rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">Edit</button>
+          <button data-action="delete-program" data-id="${programItem.id}" class="rounded-xl border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-200 dark:hover:bg-red-500/10">Delete</button>
+        </div></div></article>`;
+    })
+    .join("");
+  lucide.createIcons();
+}
+
 // Listen to wedding details document for realtime media and cover updates
 let unsubscribeDetails = null;
 function listenToDetails() {
@@ -443,59 +534,6 @@ function listenToDetails() {
     if (elements.mediaCoverPreview) {
       if (data.coverImageUrl) {
         elements.mediaCoverPreview.src = data.coverImageUrl;
-        allEvents = snapshot.docs.map((item) => ({
-          id: item.id,
-          ...item.data(),
-        }));
-        // If any event is missing a numeric `order`, normalize orders based on createdAt (oldest -> smallest order)
-        const missingOrder = allEvents.some((e) => typeof e.order !== "number");
-        if (missingOrder) {
-          // compute desired order by createdAt ascending
-          const byCreatedAsc = allEvents.slice().sort((a, b) => {
-            const ta = a.createdAt?.toDate
-              ? a.createdAt.toDate().getTime()
-              : new Date(a.createdAt || 0).getTime();
-            const tb = b.createdAt?.toDate
-              ? b.createdAt.toDate().getTime()
-              : new Date(b.createdAt || 0).getTime();
-            return ta - tb;
-          });
-          // prepare updates for docs that lack order
-          const updates = [];
-          byCreatedAsc.forEach((ev, idx) => {
-            if (typeof ev.order !== "number")
-              updates.push({ id: ev.id, order: idx + 1 });
-          });
-          // persist normalization to Firestore
-          (async () => {
-            try {
-              for (const u of updates) {
-                await updateDoc(doc(db, "events", u.id), { order: u.order });
-              }
-              console.info("Normalized event order fields");
-            } catch (err) {
-              console.error("Failed to normalize event order:", err);
-            }
-          })();
-          // update local allEvents so UI updates immediately
-          allEvents = byCreatedAsc.map((ev, idx) => ({
-            ...ev,
-            order: typeof ev.order === "number" ? ev.order : idx + 1,
-          }));
-        }
-        // ensure consistent ordering by `order` when available
-        allEvents.sort((a, b) => {
-          if (typeof a.order === "number" && typeof b.order === "number")
-            return a.order - b.order;
-          const ta = a.createdAt?.toDate
-            ? a.createdAt.toDate().getTime()
-            : new Date(a.createdAt || 0).getTime();
-          const tb = b.createdAt?.toDate
-            ? b.createdAt.toDate().getTime()
-            : new Date(b.createdAt || 0).getTime();
-          return ta - tb; // fallback: older first
-        });
-        renderEvents();
         elements.mediaCoverEmpty.classList.add("hidden");
       } else {
         elements.mediaCoverPreview.classList.add("hidden");
@@ -598,6 +636,9 @@ function openEventModal(mode = "add", eventItem = null) {
   } else {
     elements.eventModalTitle.textContent = "បន្ថែមកម្មវិធី";
     elements.eventIcon.value = "flower-2";
+    elements.eventTitle.value = "";
+    elements.eventTime.value = "";
+    elements.eventDesc.value = "";
   }
   elements.eventModal.classList.remove("hidden");
   elements.eventModal.classList.add("flex");
@@ -605,6 +646,30 @@ function openEventModal(mode = "add", eventItem = null) {
 function closeEventModal() {
   elements.eventModal.classList.add("hidden");
   elements.eventModal.classList.remove("flex");
+}
+function openProgramModal(mode = "add", programItem = null) {
+  elements.programForm.reset();
+  elements.programId.value = "";
+  if (mode === "edit" && programItem) {
+    elements.programModalTitle.textContent = "កែប្រែពិធីការ";
+    elements.programId.value = programItem.id;
+    elements.programName.value = programItem.name || "";
+    // Backward compatibility: use 'description' if available, fallback to 'desc' for old data
+    elements.programDesc.value =
+      programItem.description || programItem.desc || "";
+    elements.programIcon.value = programItem.icon || "sparkles";
+  } else {
+    elements.programModalTitle.textContent = "បន្ថែមពិធីការ";
+    elements.programIcon.value = "sparkles";
+    elements.programName.value = "";
+    elements.programDesc.value = "";
+  }
+  elements.programModal.classList.remove("hidden");
+  elements.programModal.classList.add("flex");
+}
+function closeProgramModal() {
+  elements.programModal.classList.add("hidden");
+  elements.programModal.classList.remove("flex");
 }
 function startQrScanner() {
   elements.scannerModal.classList.remove("hidden");
@@ -659,6 +724,7 @@ function enterDashboardMode() {
   loadWeddingDetails();
   listenToRsvps();
   listenToEvents();
+  listenToPrograms();
   listenToDetails();
 }
 function exitDashboardMode() {
@@ -666,8 +732,10 @@ function exitDashboardMode() {
   elements.dashboardSection.classList.add("hidden");
   if (unsubscribeRsvps) unsubscribeRsvps();
   if (unsubscribeEvents) unsubscribeEvents();
+  if (unsubscribePrograms) unsubscribePrograms();
   unsubscribeRsvps = null;
   unsubscribeEvents = null;
+  unsubscribePrograms = null;
 }
 
 function attachEvents() {
@@ -1056,7 +1124,10 @@ function attachEvents() {
       }
       return;
     }
-    if (action === "edit-event") openEventModal("edit", item);
+    if (action === "edit-event") {
+      openEventModal("edit", item);
+      return;
+    }
     if (action === "move-up" || action === "move-down") {
       // find index in the current sorted order
       const sorted = allEvents.slice().sort((a, b) => {
@@ -1073,7 +1144,13 @@ function attachEvents() {
       const idx = sorted.findIndex((e) => e.id === id);
       if (idx === -1) return;
       const swapWith = action === "move-up" ? idx - 1 : idx + 1;
-      if (swapWith < 0 || swapWith >= sorted.length) return;
+      if (swapWith < 0 || swapWith >= sorted.length) {
+        showToast(
+          action === "move-up" ? "Already at the top" : "Already at the bottom",
+          "error",
+        );
+        return;
+      }
       // swap order values
       const a = sorted[idx];
       const b = sorted[swapWith];
@@ -1149,11 +1226,43 @@ function attachEvents() {
   elements.eventForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     const id = elements.eventId.value;
+
+    // Validate required fields
+    const title = elements.eventTitle.value.trim();
+    const time = elements.eventTime.value.trim();
+    const desc = elements.eventDesc.value.trim();
+    const icon = elements.eventIcon.value.trim() || "flower-2";
+
+    if (!title) {
+      showToast("Event title is required", "error");
+      return;
+    }
+    if (!time) {
+      showToast("Event time is required", "error");
+      return;
+    }
+    if (!desc) {
+      showToast("Event description is required", "error");
+      return;
+    }
+    if (title.length > 100) {
+      showToast("Event title must be 100 characters or less", "error");
+      return;
+    }
+    if (time.length > 50) {
+      showToast("Event time must be 50 characters or less", "error");
+      return;
+    }
+    if (desc.length > 500) {
+      showToast("Event description must be 500 characters or less", "error");
+      return;
+    }
+
     const payload = {
-      title: elements.eventTitle.value.trim(),
-      time: elements.eventTime.value.trim(),
-      desc: elements.eventDesc.value.trim(),
-      icon: elements.eventIcon.value.trim() || "flower-2",
+      title,
+      time,
+      desc,
+      icon,
       updatedAt: new Date(),
     };
     try {
@@ -1206,6 +1315,195 @@ function attachEvents() {
     } catch (error) {
       console.error(error);
       showToast("Unable to save event", "error");
+    }
+  });
+
+  // Program event listeners
+  elements.btnAddProgram.addEventListener("click", () =>
+    openProgramModal("add"),
+  );
+  elements.closeProgramModal.addEventListener("click", closeProgramModal);
+  elements.programModal.addEventListener("click", (event) => {
+    if (event.target === elements.programModal) closeProgramModal();
+  });
+
+  elements.programsContainer.addEventListener("click", async (event) => {
+    const btn = event.target.closest("button");
+    const action = btn?.dataset.action;
+    const id = btn?.dataset.id;
+    if (!action || !id) return;
+    const item = allPrograms.find((entry) => entry.id === id);
+    if (!item) return;
+
+    if (action === "delete-program") {
+      if (!window.confirm("Delete this program?")) return;
+      if (localStorage.getItem("dashboard-demo-auth") === "true") {
+        allPrograms = allPrograms.filter((entry) => entry.id !== id);
+        saveStoredPrograms(allPrograms);
+        renderPrograms();
+        showToast("Program deleted", "success");
+        return;
+      }
+      try {
+        await deleteDoc(doc(db, "programs", id));
+        showToast("Program deleted", "success");
+      } catch (error) {
+        console.error(error);
+        showToast("Unable to delete program", "error");
+      }
+      return;
+    }
+
+    if (action === "edit-program") {
+      openProgramModal("edit", item);
+      return;
+    }
+
+    if (action === "move-up-program" || action === "move-down-program") {
+      // find index in the current sorted order
+      const sorted = allPrograms.slice().sort((a, b) => {
+        if (typeof a.order === "number" && typeof b.order === "number")
+          return a.order - b.order;
+        const ta = a.createdAt?.toDate
+          ? a.createdAt.toDate().getTime()
+          : new Date(a.createdAt || 0).getTime();
+        const tb = b.createdAt?.toDate
+          ? b.createdAt.toDate().getTime()
+          : new Date(b.createdAt || 0).getTime();
+        return tb - ta;
+      });
+      const idx = sorted.findIndex((e) => e.id === id);
+      if (idx === -1) return;
+      const swapWith = action === "move-up-program" ? idx - 1 : idx + 1;
+      if (swapWith < 0 || swapWith >= sorted.length) {
+        showToast(
+          action === "move-up-program"
+            ? "Already at the top"
+            : "Already at the bottom",
+          "error",
+        );
+        return;
+      }
+      // swap order values
+      const a = sorted[idx];
+      const b = sorted[swapWith];
+      const aOrder =
+        typeof a.order === "number"
+          ? a.order
+          : a.createdAt?.toDate
+            ? a.createdAt.toDate().getTime()
+            : new Date(a.createdAt || 0).getTime();
+      const bOrder =
+        typeof b.order === "number"
+          ? b.order
+          : b.createdAt?.toDate
+            ? b.createdAt.toDate().getTime()
+            : new Date(b.createdAt || 0).getTime();
+      if (localStorage.getItem("dashboard-demo-auth") === "true") {
+        // update local allPrograms order fields
+        allPrograms = allPrograms.map((prog) => {
+          if (prog.id === a.id) return { ...prog, order: bOrder };
+          if (prog.id === b.id) return { ...prog, order: aOrder };
+          return prog;
+        });
+        saveStoredPrograms(allPrograms);
+        renderPrograms();
+        showToast("Program order updated", "success");
+        return;
+      }
+      try {
+        await updateDoc(doc(db, "programs", a.id), { order: bOrder });
+        await updateDoc(doc(db, "programs", b.id), { order: aOrder });
+        showToast("Program order updated", "success");
+      } catch (err) {
+        console.error(err);
+        showToast("Unable to update program order", "error");
+      }
+      return;
+    }
+  });
+
+  elements.programForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const id = elements.programId.value;
+
+    // Validate required fields
+    const name = elements.programName.value.trim();
+    const description = elements.programDesc.value.trim();
+    const icon = elements.programIcon.value.trim() || "sparkles";
+
+    if (!name) {
+      showToast("Program name is required", "error");
+      return;
+    }
+    if (!description) {
+      showToast("Program description is required", "error");
+      return;
+    }
+    if (name.length > 100) {
+      showToast("Program name must be 100 characters or less", "error");
+      return;
+    }
+    if (description.length > 500) {
+      showToast("Program description must be 500 characters or less", "error");
+      return;
+    }
+
+    const payload = {
+      name,
+      description,
+      icon,
+      isActive: true,
+      updatedAt: new Date(),
+    };
+    try {
+      if (localStorage.getItem("dashboard-demo-auth") === "true") {
+        if (id) {
+          allPrograms = allPrograms.map((entry) =>
+            entry.id === id ? { ...entry, ...payload } : entry,
+          );
+        } else {
+          // assign incremental order value
+          const maxOrder = allPrograms.reduce(
+            (m, p) => Math.max(m, typeof p.order === "number" ? p.order : 0),
+            0,
+          );
+          const newProgram = {
+            id: `program-${Date.now()}`,
+            ...payload,
+            createdAt: new Date(),
+            order: maxOrder + 1,
+          };
+          allPrograms = [...allPrograms, newProgram];
+        }
+        saveStoredPrograms(allPrograms);
+        renderPrograms();
+        closeProgramModal();
+        showToast(id ? "Program updated" : "Program added", "success");
+        return;
+      }
+      if (id) await updateDoc(doc(db, "programs", id), payload);
+      else {
+        // compute order based on current programs
+        let orderVal = 1;
+        try {
+          const maxOrder = allPrograms.reduce(
+            (m, p) => Math.max(m, typeof p.order === "number" ? p.order : 0),
+            0,
+          );
+          orderVal = maxOrder + 1;
+        } catch (_) {}
+        await addDoc(programRef, {
+          ...payload,
+          createdAt: new Date(),
+          order: orderVal,
+        });
+      }
+      closeProgramModal();
+      showToast(id ? "Program updated" : "Program added", "success");
+    } catch (error) {
+      console.error(error);
+      showToast("Unable to save program", "error");
     }
   });
 }
