@@ -25,15 +25,22 @@ const docRef = doc(db, "wedding", "details");
 const rsvpRef = collection(db, "rsvps");
 const eventRef = collection(db, "events");
 const programRef = collection(db, "programs");
+const galleryRef = collection(db, "gallery");
 const EVENTS_KEY = "dashboard-events";
 const PROGRAMS_KEY = "dashboard-programs";
+const GALLERY_KEY = "dashboard-gallery";
 const DEMO_ADMIN_EMAIL = "admin@teabkar.com";
 const DEMO_ADMIN_PASSWORD = "admin1234";
+// Image validation constants
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_IMAGES_PER_UPLOAD = 12;
 
 let allRsvps = [];
 let filteredRsvps = [];
 let allEvents = [];
 let allPrograms = [];
+let allGallery = [];
 let currentPage = 1;
 const rowsPerPage = 7;
 let dailyChart;
@@ -41,6 +48,7 @@ let typeChart;
 let unsubscribeRsvps = null;
 let unsubscribeEvents = null;
 let unsubscribePrograms = null;
+let unsubscribeGallery = null;
 let html5QrcodeScanner = null;
 
 const elements = {
@@ -553,7 +561,7 @@ function listenToDetails() {
         elements.mediaLatestImg.classList.remove("hidden");
         elements.mediaLatestEmpty.classList.add("hidden");
       }
-      // Populate grid
+      // Populate grid with last 9 images (reversed for newest first display)
       if (elements.mediaGrid) {
         elements.mediaGrid.innerHTML = gallery
           .slice(-9)
@@ -562,7 +570,11 @@ function listenToDetails() {
             (img, idx) => `
             <div class="rounded-xl overflow-hidden h-24 relative group">
               <img src="${img.url || img}" class="w-full h-full object-cover" />
-              <button data-index="${idx}" data-publicid="${img.publicId || ""}" class="absolute top-1 right-1 bg-black/40 text-white rounded-full p-1 text-xs opacity-0 group-hover:opacity-100 transition-opacity">🗑</button>
+              <div class="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button data-action="gallery-moveup" data-index="${idx}" data-publicid="${img.publicId || ""}" title="Move up" class="bg-black/40 hover:bg-black/60 text-white rounded-full p-1 text-xs">↑</button>
+                <button data-action="gallery-movedown" data-index="${idx}" data-publicid="${img.publicId || ""}" title="Move down" class="bg-black/40 hover:bg-black/60 text-white rounded-full p-1 text-xs">↓</button>
+                <button data-action="gallery-delete" data-index="${idx}" data-publicid="${img.publicId || ""}" class="bg-black/40 hover:bg-black/60 text-white rounded-full p-1 text-xs">🗑</button>
+              </div>
             </div>
           `,
           )
@@ -621,6 +633,71 @@ function listenToDetails() {
       elements.mediaBrideBio.textContent = data.brideBio || "";
     }
   });
+}
+
+// Gallery management functions
+function validateImageFile(file) {
+  if (!file) {
+    return { valid: false, error: "No file selected" };
+  }
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    return {
+      valid: false,
+      error: "Invalid image type. Only JPEG, PNG, and WebP are allowed",
+    };
+  }
+  if (file.size > MAX_IMAGE_SIZE) {
+    return {
+      valid: false,
+      error: `Image too large. Maximum size is ${MAX_IMAGE_SIZE / 1024 / 1024}MB`,
+    };
+  }
+  return { valid: true };
+}
+
+function getStoredGallery() {
+  try {
+    return JSON.parse(localStorage.getItem(GALLERY_KEY) || "[]");
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+}
+
+function saveStoredGallery(gallery) {
+  localStorage.setItem(GALLERY_KEY, JSON.stringify(gallery));
+}
+
+function listenToGallery() {
+  if (localStorage.getItem("dashboard-demo-auth") === "true") {
+    allGallery = getStoredGallery();
+    renderGallery();
+    return;
+  }
+
+  const q = query(galleryRef, orderBy("order", "asc"));
+  unsubscribeGallery = onSnapshot(q, (snapshot) => {
+    allGallery = snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
+    // Ensure consistent ordering by `order` field
+    allGallery.sort((a, b) => {
+      if (typeof a.order === "number" && typeof b.order === "number")
+        return a.order - b.order;
+      const ta = a.createdAt?.toDate
+        ? a.createdAt.toDate().getTime()
+        : new Date(a.createdAt || 0).getTime();
+      const tb = b.createdAt?.toDate
+        ? b.createdAt.toDate().getTime()
+        : new Date(b.createdAt || 0).getTime();
+      return ta - tb; // fallback: oldest first
+    });
+    renderGallery();
+  });
+}
+
+function renderGallery() {
+  // Gallery display is part of listenToDetails rendering
+  // This function is for dedicated gallery collection display if needed
+  // For now, gallery is displayed in the media grid that's updated by listenToDetails
 }
 
 function openEventModal(mode = "add", eventItem = null) {
@@ -725,6 +802,7 @@ function enterDashboardMode() {
   listenToRsvps();
   listenToEvents();
   listenToPrograms();
+  listenToGallery();
   listenToDetails();
 }
 function exitDashboardMode() {
@@ -733,9 +811,11 @@ function exitDashboardMode() {
   if (unsubscribeRsvps) unsubscribeRsvps();
   if (unsubscribeEvents) unsubscribeEvents();
   if (unsubscribePrograms) unsubscribePrograms();
+  if (unsubscribeGallery) unsubscribeGallery();
   unsubscribeRsvps = null;
   unsubscribeEvents = null;
   unsubscribePrograms = null;
+  unsubscribeGallery = null;
 }
 
 function attachEvents() {
@@ -955,38 +1035,138 @@ function attachEvents() {
     e.preventDefault();
     const files = Array.from(elements.galleryInput?.files || []);
     if (!files.length) return showToast("No images selected", "error");
+
+    // Validate all files before uploading
+    for (const file of files) {
+      const validation = validateImageFile(file);
+      if (!validation.valid) {
+        showToast(validation.error, "error");
+        return;
+      }
+    }
+
+    if (files.length > MAX_IMAGES_PER_UPLOAD) {
+      showToast(`Maximum ${MAX_IMAGES_PER_UPLOAD} images per upload`, "error");
+      return;
+    }
+
     const category = elements.galleryCategory?.value || "prewedding";
     elements.uploadGalleryBtn.disabled = true;
-    elements.uploadGalleryBtn.textContent = "Uploading...";
+    const originalText = elements.uploadGalleryBtn.textContent;
+
     try {
       const uploaded = [];
-      for (const file of files) {
+      let successCount = 0;
+      let failCount = 0;
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const progress = Math.round(((i + 1) / files.length) * 100);
+        elements.uploadGalleryBtn.textContent = `Uploading ${progress}%`;
+
         try {
           const res = await uploadImage(file);
-          uploaded.push({
-            url: res.secure_url,
-            publicId: res.public_id,
+          const galleryItem = {
+            title: file.name.replace(/\.[^/.]+$/, ""), // filename without extension
+            imageUrl: res.secure_url,
+            cloudinaryPublicId: res.public_id,
             category,
             uploadedAt: new Date().toISOString(),
-          });
+          };
+          uploaded.push(galleryItem);
+          successCount++;
           console.info("Uploaded gallery image:", res.secure_url);
         } catch (err) {
-          console.error("Failed to upload image:", err);
+          console.error("Failed to upload image:", file.name, err);
+          failCount++;
         }
       }
+
       if (uploaded.length) {
-        // merge into Firestore document
-        const snap = await getDoc(docRef);
-        const existing = snap.exists() ? snap.data().galleryImages || [] : [];
-        const merged = [...existing, ...uploaded];
-        await setDoc(docRef, {
-          ...(snap.exists() ? snap.data() : {}),
-          galleryImages: merged,
-        });
-        showToast(`Uploaded ${uploaded.length} images`, "success");
+        // For demo mode: save to localStorage
+        if (localStorage.getItem("dashboard-demo-auth") === "true") {
+          // Get existing gallery items
+          let existingDemo = getStoredGallery();
+          // Calculate next order value
+          const maxOrder = existingDemo.reduce(
+            (m, item) =>
+              Math.max(m, typeof item.order === "number" ? item.order : 0),
+            0,
+          );
+          // Add new items with order and other required fields
+          const newItems = uploaded.map((item, idx) => ({
+            id: `gallery-${Date.now()}-${idx}`,
+            ...item,
+            order: maxOrder + idx + 1,
+            isActive: true,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          }));
+          existingDemo = [...existingDemo, ...newItems];
+          saveStoredGallery(existingDemo);
+          renderGallery();
+          showToast(
+            `Uploaded ${successCount} image${successCount !== 1 ? "s" : ""}${
+              failCount ? ` (${failCount} failed)` : ""
+            }`,
+            successCount > 0 ? "success" : "error",
+          );
+        } else {
+          // Save to Firestore: both to wedding details (backward compat) and gallery collection
+          const snap = await getDoc(docRef);
+          const existing = snap.exists() ? snap.data().galleryImages || [] : [];
+          const legacyItems = uploaded.map((item) => ({
+            url: item.imageUrl,
+            publicId: item.cloudinaryPublicId,
+            category: item.category,
+            uploadedAt: item.uploadedAt,
+          }));
+          const merged = [...existing, ...legacyItems];
+
+          // Update wedding details for backward compatibility
+          await setDoc(
+            docRef,
+            {
+              ...(snap.exists() ? snap.data() : {}),
+              galleryImages: merged,
+            },
+            { merge: true },
+          );
+
+          // Also add to dedicated gallery collection
+          const galleryDocs = allGallery || [];
+          const maxOrder = galleryDocs.reduce(
+            (m, item) =>
+              Math.max(m, typeof item.order === "number" ? item.order : 0),
+            0,
+          );
+
+          for (let i = 0; i < uploaded.length; i++) {
+            const item = uploaded[i];
+            await addDoc(galleryRef, {
+              title: item.title,
+              imageUrl: item.imageUrl,
+              cloudinaryPublicId: item.cloudinaryPublicId,
+              order: maxOrder + i + 1,
+              isActive: true,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            });
+          }
+
+          showToast(
+            `Uploaded ${successCount} image${successCount !== 1 ? "s" : ""}${
+              failCount ? ` (${failCount} failed)` : ""
+            }`,
+            successCount > 0 ? "success" : "error",
+          );
+        }
+
         // clear input & previews
         elements.galleryInput.value = "";
         elements.galleryPreviewList.innerHTML = "";
+        galleryPreviewUrls.forEach((u) => URL.revokeObjectURL(u));
+        galleryPreviewUrls = [];
       } else {
         showToast("No images were uploaded", "error");
       }
@@ -995,7 +1175,7 @@ function attachEvents() {
       showToast("Gallery upload failed", "error");
     } finally {
       elements.uploadGalleryBtn.disabled = false;
-      elements.uploadGalleryBtn.textContent = "Upload";
+      elements.uploadGalleryBtn.textContent = originalText;
     }
   });
 
@@ -1189,38 +1369,100 @@ function attachEvents() {
       return;
     }
   });
-  // Media grid deletion (remove from Firestore galleryImages array)
+  // Media grid actions (delete, reorder)
   elements.mediaGrid?.addEventListener("click", async (e) => {
     const btn = e.target.closest("button");
     if (!btn) return;
+    const action = btn.dataset.action;
     const publicId = btn.dataset.publicid;
     const idx = Number(btn.dataset.index);
-    if (!window.confirm("Remove this image from gallery?")) return;
-    try {
-      const snap = await getDoc(docRef);
-      const existing = snap.exists() ? snap.data().galleryImages || [] : [];
-      // Remove by publicId if available, otherwise remove by matching index from end
-      let updated = existing.filter((item) => {
-        if (publicId && item.publicId) return item.publicId !== publicId;
-        return true;
-      });
-      // If publicId not matched and idx provided, try removing by position
-      if (updated.length === existing.length && !publicId) {
-        // remove the (idx)th item in the displayed reversed slice
-        const slice = existing.slice(-9).reverse();
-        const itemToRemove = slice[idx];
-        if (itemToRemove) {
-          updated = existing.filter((it) => it !== itemToRemove);
+
+    if (action === "gallery-delete") {
+      if (!window.confirm("Remove this image from gallery?")) return;
+      try {
+        const snap = await getDoc(docRef);
+        const existing = snap.exists() ? snap.data().galleryImages || [] : [];
+        // Remove by publicId if available, otherwise remove by matching index from end
+        let updated = existing.filter((item) => {
+          if (publicId && item.publicId) return item.publicId !== publicId;
+          return true;
+        });
+        // If publicId not matched and idx provided, try removing by position
+        if (updated.length === existing.length && !publicId) {
+          // remove the (idx)th item in the displayed reversed slice
+          const slice = existing.slice(-9).reverse();
+          const itemToRemove = slice[idx];
+          if (itemToRemove) {
+            updated = existing.filter((it) => it !== itemToRemove);
+          }
         }
+        await setDoc(
+          docRef,
+          {
+            ...(snap.exists() ? snap.data() : {}),
+            galleryImages: updated,
+          },
+          { merge: true },
+        );
+        showToast("Image removed from gallery", "success");
+      } catch (err) {
+        console.error(err);
+        showToast("Unable to remove image", "error");
       }
-      await setDoc(docRef, {
-        ...(snap.exists() ? snap.data() : {}),
-        galleryImages: updated,
-      });
-      showToast("Image removed from gallery", "success");
-    } catch (err) {
-      console.error(err);
-      showToast("Unable to remove image", "error");
+      return;
+    }
+
+    if (action === "gallery-moveup" || action === "gallery-movedown") {
+      try {
+        const snap = await getDoc(docRef);
+        const existing = snap.exists() ? snap.data().galleryImages || [] : [];
+        if (existing.length < 2) {
+          showToast("Not enough images to reorder", "error");
+          return;
+        }
+
+        // Find current position in the displayed reversed slice
+        const displayed = existing.slice(-9).reverse();
+        if (idx < 0 || idx >= displayed.length) {
+          showToast("Image not found", "error");
+          return;
+        }
+
+        // Calculate swap position
+        const swapIdx = action === "gallery-moveup" ? idx - 1 : idx + 1;
+        if (swapIdx < 0 || swapIdx >= displayed.length) {
+          showToast(
+            action === "gallery-moveup"
+              ? "Already at the top"
+              : "Already at the bottom",
+            "error",
+          );
+          return;
+        }
+
+        // Swap items in the original array
+        const currentIdx = existing.length - 9 + (displayed.length - 1 - idx);
+        const swapAtIdx =
+          existing.length - 9 + (displayed.length - 1 - swapIdx);
+
+        const temp = existing[currentIdx];
+        existing[currentIdx] = existing[swapAtIdx];
+        existing[swapAtIdx] = temp;
+
+        await setDoc(
+          docRef,
+          {
+            ...(snap.exists() ? snap.data() : {}),
+            galleryImages: existing,
+          },
+          { merge: true },
+        );
+        showToast("Image order updated", "success");
+      } catch (err) {
+        console.error(err);
+        showToast("Unable to reorder images", "error");
+      }
+      return;
     }
   });
   elements.eventForm.addEventListener("submit", async (event) => {
