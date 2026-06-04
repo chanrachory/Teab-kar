@@ -201,8 +201,10 @@ function showToast(message, tone = "info") {
     showToast("PDF Exported successfully", "success");
   }
   // ... in attachEvents ...
-  elements.btnExportCsv.addEventListener("click", exportToCSV);
-  elements.btnExportPdf.addEventListener("click", exportToPDF);
+  if (elements.btnExportCsv)
+    elements.btnExportCsv?.addEventListener("click", exportToCSV);
+  if (elements.btnExportPdf)
+    elements.btnExportPdf?.addEventListener("click", exportToPDF);
 
   const colors = {
     info: "bg-slate-800 text-white",
@@ -465,7 +467,7 @@ function stopQrScanner() {
 }
 
 function attachEvents() {
-  elements.loginForm.addEventListener("submit", async (event) => {
+  elements.loginForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
@@ -478,11 +480,11 @@ function attachEvents() {
     }
   });
 
-  elements.logoutBtn.addEventListener("click", () => signOut(auth));
-  elements.darkModeToggle.addEventListener("click", toggleTheme);
-  elements.mobileDarkMode.addEventListener("click", toggleTheme);
+  elements.logoutBtn?.addEventListener("click", () => signOut(auth));
+  elements.darkModeToggle?.addEventListener("click", toggleTheme);
+  elements.mobileDarkMode?.addEventListener("click", toggleTheme);
 
-  elements.guestSearch.addEventListener("input", () => {
+  elements.guestSearch?.addEventListener("input", () => {
     currentPage = 1;
     renderTable(allRsvps);
   });
@@ -587,15 +589,15 @@ function attachEvents() {
     }
   });
 
-  elements.btnScanQr.addEventListener("click", startQrScanner);
+  elements.btnScanQr?.addEventListener("click", startQrScanner);
   elements.closeScannerModal.addEventListener("click", stopQrScanner);
   elements.scannerModal.addEventListener("click", (event) => {
     if (event.target === elements.scannerModal) stopQrScanner();
   });
 
-  elements.btnAddEvent.addEventListener("click", () => openEventModal());
-  elements.closeEventModal.addEventListener("click", closeEventModal);
-  elements.eventModal.addEventListener("click", (event) => {
+  elements.btnAddEvent?.addEventListener("click", () => openEventModal());
+  elements.closeEventModal?.addEventListener("click", closeEventModal);
+  elements.eventModal?.addEventListener("click", (event) => {
     if (event.target === elements.eventModal) closeEventModal();
   });
 
