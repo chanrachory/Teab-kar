@@ -144,24 +144,37 @@ export default function InitialOverlay({ onComplete, showToast, startMusic }) {
           <div className="space-y-4">
             <button
               onClick={() => handleSelectType("single")}
-              className="w-full py-4 bg-white/10 rounded-2xl border border-white/20 hover:bg-white/20 transition-all duration-300"
+              className="w-full py-4 bg-white/10 rounded-2xl border border-white/20 hover:bg-white/20 transition-all duration-300 font-semibold text-white"
             >
               Single (គ្មានអ្នកយក😏)
             </button>
 
             <button
               onClick={() => handleSelectType("couple")}
-              className="w-full py-4 bg-amber-600/20 text-amber-400 rounded-2xl border border-amber-500/30 hover:bg-amber-600/30 transition-all duration-300"
+              className="w-full py-4 bg-amber-600/20 text-amber-400 rounded-2xl border border-amber-500/30 hover:bg-amber-600/30 transition-all duration-300 font-semibold"
             >
               មកជាមួយដៃគូរ😎
             </button>
 
             <button
               onClick={() => handleSelectType("decline")}
-              className="w-full py-4 bg-red-600/20 text-red-400 rounded-2xl border border-red-500/30 hover:bg-red-600/30 transition-all duration-300"
+              className="w-full py-4 bg-red-600/20 text-red-400 rounded-2xl border border-red-500/30 hover:bg-red-600/30 transition-all duration-300 font-semibold"
             >
               មិនអាចចូលរួមបានទេ 🙏
             </button>
+
+            <div className="pt-2 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => {
+                  startMusic();
+                  onComplete("ភ្ញៀវកិត្តិយស", null);
+                }}
+                className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-2xl font-bold hover:from-amber-600 hover:to-amber-700 transition shadow-lg flex items-center justify-center gap-2"
+              >
+                💌 បើកមើលធៀបការ (View Invitation)
+              </button>
+            </div>
           </div>
         )}
 
