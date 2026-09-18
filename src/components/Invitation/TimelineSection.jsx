@@ -64,31 +64,31 @@ export default function TimelineSection({ events }) {
   const list = events && events.length > 0 ? events : defaultEvents;
 
   return (
-    <section className="py-24 px-6 bg-slate-50 text-black">
+    <section className="py-24 px-6 bg-black/60 backdrop-blur-md text-white border-y border-white/10">
       <div className="max-w-4xl mx-auto">
         <div className="text-center px-4 mb-16">
-          <h3 className="font-moul sm:text-3xl text-amber-600 underline underline-offset-8 decoration-amber-200/50 leading-loose">
+          <h3 className="font-moul sm:text-3xl gold-text underline underline-offset-8 decoration-amber-400/50 leading-loose">
             កម្មវិធីតាមប្រពៃណី
           </h3>
-          <p className="text-gray-500 mt-4 font-kantumruy">
+          <p className="text-gray-300 mt-4 font-kantumruy">
             លំដាប់លំដោយនៃកម្មវិធី
           </p>
         </div>
 
-        <div className="relative border-l-2 border-amber-300 ml-3 md:ml-6 space-y-12">
+        <div className="relative border-l-2 border-amber-400/40 ml-3 md:ml-6 space-y-12">
           {list.map((ev) => (
             <div key={ev.id || ev.title} className="relative pl-10 md:pl-16 group">
-              <div className="absolute -left-[11px] bg-amber-500 w-5 h-5 rounded-full border-4 border-white shadow group-hover:scale-125 transition-transform duration-300"></div>
-              <div className="bg-white p-6 rounded-2xl shadow-lg border border-amber-100 hover:shadow-xl transition-shadow flex gap-4 items-start">
-                <div className="bg-amber-50 p-3 rounded-xl text-amber-600 hidden sm:block">
+              <div className="absolute -left-[11px] bg-amber-500 w-5 h-5 rounded-full border-4 border-black shadow group-hover:scale-125 transition-transform duration-300"></div>
+              <div className="glass-box p-6 rounded-2xl shadow-xl border border-white/10 hover:border-amber-400/40 transition flex gap-4 items-start">
+                <div className="bg-amber-500/10 border border-amber-500/20 p-3 rounded-xl text-amber-400 hidden sm:block">
                   {renderIcon(ev.icon)}
                 </div>
                 <div>
-                  <h4 className="font-moul text-lg text-amber-700 mb-2">
+                  <h4 className="font-moul text-lg gold-text mb-2">
                     {ev.title}
                   </h4>
-                  <p className="text-amber-600 font-bold mb-2">{ev.time}</p>
-                  <p className="text-gray-600 text-sm">{ev.desc || ev.description}</p>
+                  <p className="text-amber-400 font-bold mb-2">{ev.time}</p>
+                  <p className="text-gray-200 text-sm leading-relaxed">{ev.desc || ev.description}</p>
                 </div>
               </div>
             </div>

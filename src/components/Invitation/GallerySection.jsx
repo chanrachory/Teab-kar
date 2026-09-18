@@ -38,13 +38,13 @@ export default function GallerySection({ firestoreGallery, weddingDetails }) {
   }
 
   return (
-    <section className="py-24 px-6 bg-white text-black relative">
+    <section className="py-24 px-6 bg-black/50 backdrop-blur-md text-white relative border-y border-white/10">
       <div className="max-w-6xl mx-auto">
         <div className="text-center px-4 mb-12">
-          <h3 className="font-moul sm:text-3xl text-amber-600 underline underline-offset-8 decoration-amber-200/50 leading-loose">
+          <h3 className="font-moul sm:text-3xl gold-text underline underline-offset-8 decoration-amber-400/50 leading-loose">
             វិចិត្រសាលរូបភាព
           </h3>
-          <p className="text-gray-500 mt-4 font-kantumruy">
+          <p className="text-gray-300 mt-4 font-kantumruy">
             អនុស្សាវរីយ៍ដ៏ស្រស់ស្អាតរបស់យើង
           </p>
         </div>
@@ -53,20 +53,20 @@ export default function GallerySection({ firestoreGallery, weddingDetails }) {
         <div className="flex justify-center gap-4 mb-10">
           <button
             onClick={() => setCurrentTab("prewedding")}
-            className={`px-6 py-2 rounded-full border border-amber-500 font-kantumruy transition-colors duration-300 ${
+            className={`px-6 py-2 rounded-full border border-amber-500 font-kantumruy transition-all duration-300 cursor-pointer ${
               currentTab === "prewedding"
-                ? "bg-amber-500 text-white"
-                : "bg-transparent text-amber-600 hover:bg-amber-50"
+                ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/25"
+                : "bg-white/10 text-amber-300 hover:bg-white/20"
             }`}
           >
             Pre-Wedding
           </button>
           <button
             onClick={() => setCurrentTab("ceremony")}
-            className={`px-6 py-2 rounded-full border border-amber-500 font-kantumruy transition-colors duration-300 ${
+            className={`px-6 py-2 rounded-full border border-amber-500 font-kantumruy transition-all duration-300 cursor-pointer ${
               currentTab === "ceremony"
-                ? "bg-amber-500 text-white"
-                : "bg-transparent text-amber-600 hover:bg-amber-50"
+                ? "bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-500/25"
+                : "bg-white/10 text-amber-300 hover:bg-white/20"
             }`}
           >
             Ceremony

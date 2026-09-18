@@ -44,6 +44,11 @@ export default function DetailsEditor({ weddingDetails, showToast }) {
   const [coverItems, setCoverItems] = useState([]);
   const [mainCoverId, setMainCoverId] = useState("");
 
+  // Background Image state
+  const [bgImageUrl, setBgImageUrl] = useState("");
+  const [bgFile, setBgFile] = useState(null);
+  const [bgFilePreview, setBgFilePreview] = useState("");
+
   // Pre-Wedding gallery items
   const [preweddingItems, setPreweddingItems] = useState([]);
 
@@ -65,6 +70,7 @@ export default function DetailsEditor({ weddingDetails, showToast }) {
       setMapUrl(weddingDetails.mapUrl || "");
       setGroomImageId(weddingDetails.groomImageId || "");
       setBrideImageId(weddingDetails.brideImageId || "");
+      setBgImageUrl(weddingDetails.bgImageUrl || weddingDetails.backgroundImageUrl || "");
 
       // 1. Cover Images
       const rawCovers = Array.isArray(weddingDetails.coverImages)
@@ -124,6 +130,22 @@ export default function DetailsEditor({ weddingDetails, showToast }) {
     setBrideFile(file);
     setBrideFilePreview(URL.createObjectURL(file));
     if (showToast) showToast("បានជ្រើសរើសរូបភាពកូនក្រមុំ! (សូមចុចរក្សាទុកដើម្បី Upload)", "info");
+  };
+
+  // Handle local selection for Card Background Image
+  const handleSelectBgImage = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setBgFile(file);
+    setBgFilePreview(URL.createObjectURL(file));
+    if (showToast) showToast("បានជ្រើសរើសរូបភាព Background! (សូមចុចរក្សាទុកដើម្បី Upload)", "info");
+  };
+
+  const handleRemoveBgImage = () => {
+    setBgFile(null);
+    setBgFilePreview("");
+    setBgImageUrl("");
+    if (showToast) showToast("បានលុបរូបភាព Background!", "info");
   };
 
   // Handle local selection for Cover Images
@@ -250,6 +272,16 @@ export default function DetailsEditor({ weddingDetails, showToast }) {
         setBrideFilePreview("");
       }
 
+      // 2.5. Upload Card Background image
+      let finalBgImageUrl = bgImageUrl;
+      if (bgFile) {
+        const resBg = await uploadImage(bgFile);
+        finalBgImageUrl = resBg.secure_url || resBg.public_id;
+        setBgImageUrl(finalBgImageUrl);
+        setBgFile(null);
+        setBgFilePreview("");
+      }
+
       // 3. Upload Cover images
       const finalCoverUrls = [];
       let finalMainCoverUrl = "";
@@ -306,6 +338,8 @@ export default function DetailsEditor({ weddingDetails, showToast }) {
           mapUrl,
           groomImageId: finalGroomImageId,
           brideImageId: finalBrideImageId,
+          bgImageUrl: finalBgImageUrl,
+          backgroundImageUrl: finalBgImageUrl,
           coverImageUrl: finalMainCoverUrl,
           coverUrl: finalMainCoverUrl,
           coverImages: finalCoverUrls,
@@ -632,6 +666,67 @@ export default function DetailsEditor({ weddingDetails, showToast }) {
               className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition focus:border-amber-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 font-mono text-xs"
             />
           </div>
+        </div>
+
+        {/* SECTION 2.5: INVITATION CARD BACKGROUND IMAGE */}
+        <div className="rounded-3xl border border-amber-500/20 bg-white/90 p-6 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-900/90 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-100 dark:border-slate-800">
+            <div>
+              <h3 className="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-amber-500" />
+                រូបភាពផ្ទៃខាងក្រោយធៀបការ (Invitation Card Fixed Background Image)
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                រូបភាពនេះនឹងបង្ហាញជាផ្ទៃខាងក្រោយ (Fixed Background) នៃធៀបការ។ ពេលភ្ញៀវ Scroll ចុះក្រោម កាតព័ត៌មានផ្សេងៗនឹងរំកិលពីលើរូបភាពនេះយ៉ាងស្រស់ស្អាត!
+              </p>
+            </div>
+            <label className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold cursor-pointer transition shadow-md shrink-0">
+              <Upload className="w-4 h-4" />
+              {bgFilePreview || bgImageUrl ? "ប្តូររូបភាព Background" : "ជ្រើសរើសរូបភាព Background"}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleSelectBgImage}
+                className="hidden"
+              />
+            </label>
+          </div>
+
+          {bgFilePreview || bgImageUrl ? (
+            <div className="relative rounded-2xl overflow-hidden border-2 border-amber-400/50 shadow-lg max-w-xl mx-auto group">
+              <img
+                src={bgFilePreview || resolveUrl(bgImageUrl)}
+                alt="Invitation Background Preview"
+                className="w-full h-56 object-cover filter brightness-[0.8]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-4 flex flex-col justify-between">
+                <div className="flex justify-between items-start">
+                  <span className="bg-amber-500 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-lg shadow-md flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    {bgFile ? "រូបថ្មី (រង់ចាំ Save)" : "រូបភាព Background បច្ចុប្បន្ន"}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleRemoveBgImage}
+                    className="p-2 rounded-xl bg-red-600/90 hover:bg-red-700 text-white text-xs transition shadow-md"
+                    title="លុបរូបភាព Background"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+                <p className="text-white text-xs font-medium italic">
+                  ✓ ផ្ទៃខាងក្រោយនេះនឹងបង្ហាញជាប់ (Fixed) ពេលភ្ញៀវបើកធៀបការមើល ហើយពេល Scroll កាតព័ត៌មាននឹងរំកិលពីលើ
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="p-8 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl bg-slate-50/50 dark:bg-slate-900/50">
+              <ImageIcon className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                មិនទាន់មានរូបភាព Background នៅឡើយទេ។ (ចុចប៊ូតុងខាងលើដើម្បីជ្រើសរើសរូបភាព)
+              </p>
+            </div>
+          )}
         </div>
 
         {/* SECTION 3: COVER BANNER IMAGES */}

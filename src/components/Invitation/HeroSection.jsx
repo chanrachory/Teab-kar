@@ -6,13 +6,28 @@ export default function HeroSection({
   weddingDetails,
   guestName,
   onLogoutGuest,
+  onUpdateGuestName,
 }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [inputName, setInputName] = useState(guestName || "");
   const [timeLeft, setTimeLeft] = useState({
     days: "00",
     hours: "00",
     minutes: "00",
     seconds: "00",
   });
+
+  useEffect(() => {
+    setInputName(guestName || "");
+  }, [guestName]);
+
+  const handleSaveName = (e) => {
+    e.preventDefault();
+    if (onUpdateGuestName) {
+      onUpdateGuestName(inputName);
+    }
+    setIsEditing(false);
+  };
 
   const weddingDateStr =
     weddingDetails?.eventDateStr || "2030-02-04T00:00:00";
@@ -85,7 +100,7 @@ export default function HeroSection({
   const currentCover = coverImagesList[currentCoverIdx] || "";
   const heroStyle = currentCover
     ? {
-        backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('${currentCover}')`,
+        backgroundImage: `linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.45)), url('${currentCover}')`,
       }
     : {};
 
@@ -95,71 +110,100 @@ export default function HeroSection({
       style={heroStyle}
     >
       <div className="fade-in w-full max-w-4xl">
-        <h1 className="font-moul text-2xl sm:text-4xl md:text-5xl mb-12 tracking-wider">
+        <h1 className="font-moul text-2xl sm:text-4xl md:text-5xl mb-12 tracking-wider gold-text">
           សិរីមង្គលអាពាហ៍ពិពាហ៍
         </h1>
 
-        <div className="glass-box rounded-[3rem] py-12 px-6 sm:px-12 mb-12 border-2 border-white/5">
+        <div className="glass-box rounded-[3rem] py-12 px-6 sm:px-12 mb-12 border-2 border-amber-400/30 shadow-2xl">
           <h2 className="font-moul text-4xl sm:text-6xl md:text-7xl gold-text mb-6">
             {weddingDetails?.groomName || "កូនកំលោះ"}
           </h2>
           <div className="my-8 flex justify-center">
-            <Heart className="fill-red-500 text-red-500 w-16 h-16 animate-pulse" />
+            <Heart className="fill-red-500 text-red-500 w-16 h-16 animate-pulse drop-shadow-[0_0_15px_rgba(239,68,68,0.6)]" />
           </div>
           <h2 className="font-moul text-4xl sm:text-6xl md:text-7xl gold-text mt-6">
             {weddingDetails?.brideName || "កូនក្រមុំ"}
           </h2>
         </div>
 
-        <p className="text-lg md:text-xl mb-6 italic text-gray-300">
+        <p className="text-lg md:text-xl mb-6 italic text-amber-200/90 font-medium">
           សូមគោរពអញ្ជើញ
         </p>
 
-        <div className="guest-box mb-12">
-          <div className="flex items-center justify-center gap-3">
-            <span className="text-2xl sm:text-4xl font-bold tracking-widest text-white">
-              {guestName || "ភ្ញៀវកិត្តិយស"}
-            </span>
-            <button
-              onClick={onLogoutGuest}
-              className="ml-2 text-sm bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-xl transition"
+        <div className="guest-box mb-12 border-amber-400/60 bg-black/25 backdrop-blur-md shadow-xl">
+          {isEditing ? (
+            <form
+              onSubmit={handleSaveName}
+              className="flex items-center justify-center gap-2 max-w-sm mx-auto"
             >
-              ប្តូរឈ្មោះ
-            </button>
-          </div>
+              <input
+                type="text"
+                value={inputName}
+                onChange={(e) => setInputName(e.target.value)}
+                placeholder="បញ្ចូលឈ្មោះរបស់អ្នក"
+                className="flex-1 px-4 py-2 bg-white/20 border border-amber-400 rounded-xl text-white text-center font-bold outline-none"
+                autoFocus
+              />
+              <button
+                type="submit"
+                className="bg-amber-500 hover:bg-amber-600 text-white font-semibold px-4 py-2 rounded-xl transition text-sm shadow-md"
+              >
+                រក្សាទុក
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsEditing(false)}
+                className="bg-white/20 hover:bg-white/30 text-gray-200 px-3 py-2 rounded-xl transition text-sm"
+              >
+                បោះបង់
+              </button>
+            </form>
+          ) : (
+            <div className="flex items-center justify-center gap-3">
+              <span className="text-2xl sm:text-4xl font-bold tracking-widest text-white drop-shadow-md">
+                {guestName || "ភ្ញៀវកិត្តិយស"}
+              </span>
+              <button
+                onClick={() => setIsEditing(true)}
+                className="ml-2 text-sm bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 border border-amber-400/40 px-3.5 py-2 rounded-xl transition cursor-pointer font-semibold shadow-sm"
+              >
+                ប្តូរឈ្មោះ
+              </button>
+            </div>
+          )}
         </div>
 
-        <div className="space-y-4 bg-black/40 p-8 rounded-3xl border border-white/10 backdrop-blur-md">
+        <div className="space-y-4 bg-black/30 p-8 rounded-3xl border border-amber-400/30 backdrop-blur-md shadow-2xl">
           <p className="date_text font-moul sm:text-2xl gold-text">
             {weddingDetails?.eventDate || "ថ្ងៃអាទិត្យ ទី ០៤ ខែ កុម្ភៈ ឆ្នាំ ២០៣០"}
           </p>
-          <p className="text-gray-200 text-sm sm:text-lg">
+          <p className="text-gray-100 text-sm sm:text-lg font-medium">
             {weddingDetails?.location || "ភូមិរោងធិ៍រោង ឃុំជីផុច ស្រុកមេសាង ខេត្តព្រៃវែង"}
           </p>
 
           {/* Countdown Timer */}
-          <div className="mt-8 grid grid-cols-4 gap-4 text-amber-500 font-moul">
-            <div className="bg-black/60 p-4 rounded-xl border border-amber-500/30">
-              <div className="text-2xl sm:text-4xl">{timeLeft.days}</div>
-              <div className="text-xs sm:text-sm text-gray-400 mt-1 font-kantumruy">
+          <div className="mt-8 grid grid-cols-4 gap-4 text-amber-400 font-moul">
+            <div className="bg-black/35 p-4 rounded-xl border border-amber-400/30 backdrop-blur-sm shadow-md">
+              <div className="text-2xl sm:text-4xl text-amber-300">{timeLeft.days}</div>
+              <div className="text-xs sm:text-sm text-gray-200 mt-1 font-kantumruy">
                 ថ្ងៃ
               </div>
             </div>
-            <div className="bg-black/60 p-4 rounded-xl border border-amber-500/30">
-              <div className="text-2xl sm:text-4xl">{timeLeft.hours}</div>
-              <div className="text-xs sm:text-sm text-gray-400 mt-1 font-kantumruy">
+            <div className="bg-black/35 p-4 rounded-xl border border-amber-400/30 backdrop-blur-sm shadow-md">
+              <div className="text-2xl sm:text-4xl text-amber-300">{timeLeft.hours}</div>
+              <div className="text-xs sm:text-sm text-gray-200 mt-1 font-kantumruy">
                 ម៉ោង
               </div>
             </div>
-            <div className="bg-black/60 p-4 rounded-xl border border-amber-500/30">
-              <div className="text-2xl sm:text-4xl">{timeLeft.minutes}</div>
-              <div className="text-xs sm:text-sm text-gray-400 mt-1 font-kantumruy">
+            <div className="bg-black/35 p-4 rounded-xl border border-amber-400/30 backdrop-blur-sm shadow-md">
+              <div className="text-2xl sm:text-4xl text-amber-300">{timeLeft.minutes}</div>
+              <div className="text-xs sm:text-sm text-gray-200 mt-1 font-kantumruy">
                 នាទី
               </div>
             </div>
-            <div className="bg-black/60 p-4 rounded-xl border border-amber-500/30">
-              <div className="text-2xl sm:text-4xl">{timeLeft.seconds}</div>
-              <div className="text-xs sm:text-sm text-gray-400 mt-1 font-kantumruy">
+            <div className="bg-black/35 p-4 rounded-xl border border-amber-400/30 backdrop-blur-sm shadow-md">
+              <div className="text-2xl sm:text-4xl text-amber-300">{timeLeft.seconds}</div>
+              <div className="text-xs sm:text-sm text-gray-200 mt-1 font-kantumruy">
                 វិនាទី
               </div>
             </div>

@@ -23,41 +23,46 @@ export default function FooterSection({ showToast }) {
   };
 
   return (
-    <footer className="hero-bg py-32 px-6 text-center border-t border-white/10">
-      <div className="max-w-2xl mx-auto">
-        <div className="mb-10 flex justify-center">
-          <Heart className="text-red-500 fill-red-500 scale-[2] inline-block animate-pulse w-8 h-8" />
+    <footer className="py-12 sm:py-16 px-4 text-center bg-black/50 backdrop-blur-md border-t border-white/10 relative">
+      <div className="max-w-xl mx-auto glass-box p-8 sm:p-10 rounded-[2.5rem] border border-white/10 shadow-2xl">
+        <div className="mb-4 flex justify-center">
+          <div className="p-3 bg-rose-500/20 rounded-full border border-rose-500/30">
+            <Heart className="text-red-500 fill-red-500 animate-pulse w-7 h-7" />
+          </div>
         </div>
-        <h3 className="font-moul text-4xl gold-text mb-8">សូមអរគុណ</h3>
-        <p className="text-gray-200 text-xl leading-loose italic">
+
+        <h3 className="font-moul text-2xl sm:text-3xl gold-text mb-4">សូមអរគុណ</h3>
+
+        <p className="text-gray-200 text-sm sm:text-base leading-relaxed italic font-light px-2">
           " វត្តមានរបស់លោកអ្នក គឺជាកិត្តិយសដ៏ខ្ពង់ខ្ពស់សម្រាប់ក្រុមគ្រួសារយើងខ្ញុំ។ <br />
           សូមជូនពរឱ្យលោកអ្នកទទួលបាននូវសុភមង្គល និង សេចក្តីសុខគ្រប់ប្រការ។ "
         </p>
-        <div className="mt-12 flex justify-center gap-4">
+
+        <div className="mt-6 flex justify-center gap-3">
           <button
             onClick={() => shareTo("telegram")}
-            className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full transition-transform hover:scale-110 shadow-lg"
+            className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-2xl transition-all duration-300 hover:scale-110 shadow-lg shadow-blue-500/25 cursor-pointer"
             title="Share on Telegram"
           >
-            <Send className="w-5 h-5" />
+            <Send className="w-4 h-4" />
           </button>
           <button
             onClick={() => shareTo("facebook")}
-            className="bg-blue-700 hover:bg-blue-800 text-white p-3 rounded-full transition-transform hover:scale-110 shadow-lg"
+            className="bg-blue-700 hover:bg-blue-800 text-white p-3 rounded-2xl transition-all duration-300 hover:scale-110 shadow-lg shadow-blue-700/25 cursor-pointer"
             title="Share on Facebook"
           >
-            <Share2 className="w-5 h-5" />
+            <Share2 className="w-4 h-4" />
           </button>
           <button
             onClick={() => shareTo("copy")}
-            className="bg-gray-600 hover:bg-gray-700 text-white p-3 rounded-full transition-transform hover:scale-110 shadow-lg"
+            className="bg-white/10 hover:bg-white/20 text-white p-3 rounded-2xl transition-all duration-300 hover:scale-110 border border-white/20 cursor-pointer"
             title="Copy Link"
           >
-            <LinkIcon className="w-5 h-5" />
+            <LinkIcon className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="mt-20 opacity-30 text-xs tracking-[0.5em]">
+        <div className="mt-8 text-[11px] text-amber-300/60 tracking-[0.4em] uppercase font-semibold">
           FEBRUARY 2030
         </div>
       </div>
