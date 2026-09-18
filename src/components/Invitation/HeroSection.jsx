@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Heart } from "lucide-react";
+import { getImageUrl } from "../../services/cloudinary";
 
 export default function HeroSection({
   weddingDetails,
@@ -48,10 +49,43 @@ export default function HeroSection({
     return () => clearInterval(timer);
   }, [weddingDateStr]);
 
-  const coverImage = weddingDetails?.coverUrl;
-  const heroStyle = coverImage
+  const resolveUrl = (img) => {
+    if (!img) return "";
+    if (
+      img.startsWith("http://") ||
+      img.startsWith("https://") ||
+      img.startsWith("data:")
+    ) {
+      return img;
+    }
+    return getImageUrl(img);
+  };
+
+  const rawList =
+    Array.isArray(weddingDetails?.coverImages) && weddingDetails.coverImages.length > 0
+      ? weddingDetails.coverImages
+      : weddingDetails?.coverImageUrl
+      ? [weddingDetails.coverImageUrl]
+      : weddingDetails?.coverUrl
+      ? [weddingDetails.coverUrl]
+      : [];
+
+  const coverImagesList = rawList.map(resolveUrl).filter(Boolean);
+
+  const [currentCoverIdx, setCurrentCoverIdx] = useState(0);
+
+  useEffect(() => {
+    if (coverImagesList.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentCoverIdx((prev) => (prev + 1) % coverImagesList.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [coverImagesList.length]);
+
+  const currentCover = coverImagesList[currentCoverIdx] || "";
+  const heroStyle = currentCover
     ? {
-        backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('${coverImage}')`,
+        backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('${currentCover}')`,
       }
     : {};
 

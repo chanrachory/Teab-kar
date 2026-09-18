@@ -6,22 +6,35 @@ import {
   ceremonyImages,
 } from "../../services/cloudinary";
 
-export default function GallerySection({ firestoreGallery }) {
+export default function GallerySection({ firestoreGallery, weddingDetails }) {
   const [currentTab, setCurrentTab] = useState("prewedding");
   const [lightboxSrc, setLightboxSrc] = useState(null);
 
+  const preweddingList = weddingDetails?.preweddingImages || [];
+  const ceremonyList = weddingDetails?.ceremonyImages || [];
+
   let images = [];
-  if (firestoreGallery && firestoreGallery.length > 0) {
-    images = firestoreGallery.filter((g) => g.category === currentTab);
+  if (currentTab === "prewedding") {
+    if (preweddingList.length > 0) {
+      images = preweddingList.map((img) => ({ url: getImageUrl(img) }));
+    } else {
+      images = [
+        "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1583939003579-730e3918a45a?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=800",
+      ].map((url) => ({ url }));
+    }
   } else {
-    images =
-      currentTab === "prewedding"
-        ? preWeddingImages.map((id) => ({
-            url: getImageUrl(id, { width: 800, height: 800, crop: "fill" }),
-          }))
-        : ceremonyImages.map((id) => ({
-            url: getImageUrl(id, { width: 800, height: 800, crop: "fill" }),
-          }));
+    if (ceremonyList.length > 0) {
+      images = ceremonyList.map((img) => ({ url: getImageUrl(img) }));
+    } else {
+      images = [
+        "https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1520854221256-17451cc331bf?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?auto=format&fit=crop&q=80&w=800",
+      ].map((url) => ({ url }));
+    }
   }
 
   return (

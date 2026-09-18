@@ -11,6 +11,15 @@ const DEFAULT_UPLOAD_PRESET = "wedding_unsigned";
  */
 export function getImageUrl(publicId, options = {}) {
   if (!publicId) return "";
+  if (
+    typeof publicId === "string" &&
+    (publicId.startsWith("http://") ||
+      publicId.startsWith("https://") ||
+      publicId.startsWith("data:") ||
+      publicId.startsWith("blob:"))
+  ) {
+    return publicId;
+  }
   const {
     width = "auto",
     height,

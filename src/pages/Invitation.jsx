@@ -163,7 +163,10 @@ export default function Invitation() {
           />
           <ProfileSection weddingDetails={weddingDetails} />
           <TimelineSection events={events} />
-          <GallerySection firestoreGallery={weddingDetails?.galleryImages} />
+          <GallerySection
+            firestoreGallery={weddingDetails?.galleryImages}
+            weddingDetails={weddingDetails}
+          />
           <LocationSection mapUrl={weddingDetails?.mapUrl} />
           <FooterSection showToast={showToast} />
         </main>
