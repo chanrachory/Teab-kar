@@ -149,6 +149,7 @@ export default function Invitation() {
           onComplete={handleOverlayComplete}
           showToast={showToast}
           startMusic={startMusic}
+          weddingDetails={weddingDetails}
         />
       )}
 
