@@ -1,1 +1,0 @@
-Place static media assets here such as wedding images, icons, and downloadable files.

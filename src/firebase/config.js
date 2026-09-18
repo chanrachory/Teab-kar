@@ -1,5 +1,4 @@
-// js/firebase-config.js
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { initializeApp } from "firebase/app";
 import {
   getFirestore,
   doc,
@@ -14,15 +13,17 @@ import {
   updateDoc,
   getDocs,
   where
-} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+} from "firebase/firestore";
 import {
   getAuth,
   signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  createUserWithEmailAndPassword,
   onAuthStateChanged,
   signOut,
-} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+} from "firebase/auth";
 
-// TODO: លោកអ្នកត្រូវយក Firebase Config របស់លោកអ្នកមកជំនួសនៅទីនេះ
+// Exact Firebase Config provided in original codebase
 const firebaseConfig = {
   apiKey: "AIzaSyB8NlvwM8W4qj8X_Pyc5NNRt3fxLi1lHR0",
   authDomain: "teabkar-7214c.firebaseapp.com",
@@ -38,4 +39,24 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-export { db, doc, getDoc, setDoc, onSnapshot, collection, addDoc, query, orderBy, deleteDoc, updateDoc, getDocs, where, auth, signInWithEmailAndPassword, onAuthStateChanged, signOut };
+export {
+  db,
+  auth,
+  doc,
+  getDoc,
+  setDoc,
+  onSnapshot,
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  deleteDoc,
+  updateDoc,
+  getDocs,
+  where,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+};
